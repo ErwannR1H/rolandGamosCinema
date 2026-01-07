@@ -2,14 +2,53 @@
  * Module de gestion des requêtes SPARQL vers DBpedia
  */
 
+import { improveActorNameForDBpedia } from './ollamaService.js';
+
 const DBPEDIA_ENDPOINT = 'https://dbpedia.org/sparql';
 
 /**
  * Recherche un acteur sur DBpedia par son nom
+ * Logique : 1) Essai direct, 2) Si échec, correction par IA puis nouvel essai
  * @param {string} actorName - Nom de l'acteur à rechercher
  * @returns {Promise<Object|null>} - Objet contenant l'URI et le label de l'acteur, ou null
  */
 export async function findActor(actorName) {
+    console.log(`🔍 Recherche de: "${actorName}"`);
+    
+    // Étape 1 : Essai direct avec le nom tel quel
+    const directResult = await searchActorDirectly(actorName);
+    if (directResult) {
+        console.log(`✅ Trouvé directement !`);
+        return directResult;
+    }
+    
+    // Étape 2 : Si échec, utiliser l'IA pour corriger le nom
+    console.log(`❌ Pas trouvé directement, utilisation de l'IA...`);
+    const improvedName = await improveActorNameForDBpedia(actorName);
+    
+    // Si l'IA retourne le même nom, pas la peine de réessayer
+    if (improvedName.toLowerCase() === actorName.toLowerCase()) {
+        console.log(`ℹ️ L'IA n'a pas changé le nom`);
+        return null;
+    }
+    
+    // Étape 3 : Réessayer avec le nom amélioré
+    const aiResult = await searchActorDirectly(improvedName);
+    if (aiResult) {
+        console.log(`✅ Trouvé avec le nom corrigé par l'IA !`);
+        return aiResult;
+    }
+    
+    console.log(`❌ Acteur non trouvé même après correction IA`);
+    return null;
+}
+
+/**
+ * Recherche directe d'un acteur sur DBpedia
+ * @param {string} actorName - Nom de l'acteur
+ * @returns {Promise<Object|null>}
+ */
+async function searchActorDirectly(actorName) {
     const resourceName = actorName.replace(/ /g, '_');
     
     const query = `
@@ -61,8 +100,8 @@ export async function findActor(actorName) {
         
         return exactMatch || results[0];
     } catch (error) {
-        console.error('Erreur lors de la recherche de l\'acteur:', error);
-        throw error;
+        console.error('Erreur recherche acteur:', error);
+        return null;
     }
 }
 
