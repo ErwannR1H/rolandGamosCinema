@@ -9,8 +9,7 @@ const DBPEDIA_ENDPOINT = 'https://dbpedia.org/sparql';
  * @param {string} actorName - Nom de l'acteur à rechercher
  * @returns {Promise<Object|null>} - Objet contenant l'URI et le label de l'acteur, ou null
  */
-async function findActor(actorName) {
-    // Remplacer les espaces par des underscores pour construire l'URI DBpedia
+export async function findActor(actorName) {
     const resourceName = actorName.replace(/ /g, '_');
     
     const query = `
@@ -56,7 +55,6 @@ async function findActor(actorName) {
             return null;
         }
         
-        // Recherche d'une correspondance exacte ou retourne le premier résultat
         const exactMatch = results.find(r => 
             r.label.toLowerCase() === actorName.toLowerCase()
         );
@@ -73,7 +71,7 @@ async function findActor(actorName) {
  * @param {string} actorUri - URI DBpedia de l'acteur
  * @returns {Promise<Array>} - Liste des URIs des films
  */
-async function getActorMovies(actorUri) {
+export async function getActorMovies(actorUri) {
     const query = `
         PREFIX dbo: <http://dbpedia.org/ontology/>
         PREFIX dbr: <http://dbpedia.org/resource/>
@@ -110,7 +108,7 @@ async function getActorMovies(actorUri) {
  * @param {string} actor2Uri - URI du second acteur
  * @returns {Promise<Object|null>} - Objet avec le film commun ou null
  */
-async function haveCommonMovie(actor1Uri, actor2Uri) {
+export async function haveCommonMovie(actor1Uri, actor2Uri) {
     const query = `
         PREFIX dbo: <http://dbpedia.org/ontology/>
         PREFIX dbp: <http://dbpedia.org/property/>
@@ -186,7 +184,6 @@ async function executeQuery(query) {
         
         const data = await response.json();
         
-        // Transformation des résultats en format simple
         return data.results.bindings.map(binding => {
             const result = {};
             for (const key in binding) {
@@ -205,7 +202,7 @@ async function executeQuery(query) {
  * @param {string} actorUri - URI de l'acteur
  * @returns {Promise<Object>} - Informations sur l'acteur
  */
-async function getActorInfo(actorUri) {
+export async function getActorInfo(actorUri) {
     const query = `
         PREFIX dbo: <http://dbpedia.org/ontology/>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
