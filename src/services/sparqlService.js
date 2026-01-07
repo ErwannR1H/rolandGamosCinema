@@ -54,11 +54,11 @@ async function searchActorDirectly(actorName) {
     // Échapper les caractères spéciaux pour les regex SPARQL
     const safeActorName = actorName.replace(/([\\^$.*+?()[\]{}|])/g, '\\$1');
     
+    // Recherche directe par URI (rapide)
     const query = `
         PREFIX dbo: <http://dbpedia.org/ontology/>
         PREFIX dbr: <http://dbpedia.org/resource/>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         
         SELECT DISTINCT ?actor ?label WHERE {
             {
@@ -67,7 +67,7 @@ async function searchActorDirectly(actorName) {
                 ?actor rdfs:label ?label .
                 ?actor rdf:type ?type .
                 FILTER(?type = dbo:Person || ?type = dbo:Actor)
-                FILTER(LANG(?label) = "en" || LANG(?label) = "fr")
+                FILTER(LANG(?label) = "en")
             }
             UNION
             {
@@ -75,28 +75,29 @@ async function searchActorDirectly(actorName) {
                 ?actor rdfs:label ?label .
                 ?actor rdf:type ?type .
                 FILTER(?type = dbo:Person || ?type = dbo:Actor)
-                FILTER(LANG(?label) = "en" || LANG(?label) = "fr")
-                FILTER(REGEX(?label, "^${safeActorName}$", "i"))
+                FILTER(LANG(?label) = "en")
+                FILTER(REGEX(?label, "^${actorName}$", "i"))
             }
             UNION
             {
                 # Recherche partielle par label
                 ?actor rdfs:label ?label .
                 ?actor rdf:type dbo:Person .
-                FILTER(LANG(?label) = "en" || LANG(?label) = "fr")
-                FILTER(REGEX(?label, "${safeActorName}", "i"))
+                FILTER(LANG(?label) = "en")
+                FILTER(REGEX(?label, "${actorName}", "i"))
             }
         }
-        LIMIT 50
+        LIMIT 10
     `;
 
     try {
         const results = await executeQuery(query);
         
-        if (results.length === 0) {
-            return null;
+        if (results.length > 0) {
+            return results[0];
         }
         
+        // Recherche d'une correspondance exacte ou retourne le premier résultat
         const exactMatch = results.find(r => 
             r.label.toLowerCase() === actorName.toLowerCase()
         );
@@ -183,13 +184,14 @@ export async function haveCommonMovie(actor1Uri, actor2Uri) {
                 }
             }
             
-            ?movie a dbo:Film ;
-                   rdfs:label ?movieLabel .
-            
-            FILTER(LANG(?movieLabel) = "en")
+            OPTIONAL { 
+                ?movie rdfs:label ?movieLabel .
+                FILTER(LANG(?movieLabel) = "en" || LANG(?movieLabel) = "fr")
+            }
         }
-        LIMIT 20
+        LIMIT 50
     `;
+
 
     try {
         const results = await executeQuery(query);
