@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu des Acteurs - DBpedia</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 Jeu des Acteurs</h1>
+            <p class="subtitle">Trouvez des acteurs ayant joué dans un film commun</p>
+        </header>
+
+        <main>
+            <!-- Zone de statut du jeu -->
+            <div class="game-status">
+                <div class="player-turn">
+                    <span id="current-player">Joueur 1</span>
+                </div>
+                <div class="score-board">
+                    <div class="player-score">
+                        <span class="label">Joueur 1:</span>
+                        <span id="score-player1">0</span>
+                    </div>
+                    <div class="player-score">
+                        <span class="label">Joueur 2:</span>
+                        <span id="score-player2">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dernier acteur mentionné -->
+            <div id="last-actor-container" class="last-actor hidden">
+                <p>Dernier acteur: <strong id="last-actor-name"></strong></p>
+                <p class="hint">Trouvez un acteur ayant joué dans un film commun</p>
+            </div>
+
+            <!-- Zone de saisie -->
+            <div class="input-section">
+                <input 
+                    type="text" 
+                    id="actor-input" 
+                    placeholder="Entrez le nom d'un acteur (ex: Brad Pitt)"
+                    autocomplete="off"
+                >
+                <button id="submit-btn" class="btn-primary">Valider</button>
+                <button id="give-up-btn" class="btn-secondary">Abandonner</button>
+            </div>
+
+            <!-- Messages et feedback -->
+            <div id="message-container" class="message-container"></div>
+
+            <!-- Historique des acteurs -->
+            <div class="history-section">
+                <h3>Acteurs déjà mentionnés:</h3>
+                <div id="actors-history" class="actors-list"></div>
+            </div>
+
+            <!-- Loading indicator -->
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Vérification avec DBpedia...</p>
+            </div>
+        </main>
+
+        <!-- Boutons de contrôle -->
+        <div class="controls">
+            <button id="new-game-btn" class="btn-primary">Nouvelle Partie</button>
+            <button id="rules-btn" class="btn-secondary">Règles</button>
+        </div>
+
+        <!-- Modal des règles -->
+        <div id="rules-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Règles du jeu</h2>
+                <ol>
+                    <li>Le Joueur 1 commence en donnant le nom d'un acteur de cinéma</li>
+                    <li>Le Joueur 2 doit donner le nom d'un acteur ayant joué dans un film commun avec l'acteur précédent</li>
+                    <li>Les joueurs alternent les tours</li>
+                    <li>Un acteur ne peut être mentionné qu'une seule fois par partie</li>
+                    <li>Si un joueur répète un acteur ou ne trouve pas de réponse valide, il perd</li>
+                    <li>Les données proviennent de DBpedia</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/sparql.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
