@@ -12,6 +12,9 @@ const DBPEDIA_ENDPOINT = 'https://dbpedia.org/sparql';
 async function findActor(actorName) {
     // Remplacer les espaces par des underscores pour construire l'URI DBpedia
     const resourceName = actorName.replace(/ /g, '_');
+
+    // Échapper les caractères spéciaux pour les regex SPARQL
+    const safeActorName = actorName.replace(/([\\^$.*+?()[\]{}|])/g, '\\$1');
     
     const query = `
         PREFIX dbo: <http://dbpedia.org/ontology/>
@@ -26,7 +29,7 @@ async function findActor(actorName) {
                 ?actor rdfs:label ?label .
                 ?actor rdf:type ?type .
                 FILTER(?type = dbo:Person || ?type = dbo:Actor)
-                FILTER(LANG(?label) = "en")
+                FILTER(LANG(?label) = "en" || LANG(?label) = "fr")
             }
             UNION
             {
@@ -34,19 +37,19 @@ async function findActor(actorName) {
                 ?actor rdfs:label ?label .
                 ?actor rdf:type ?type .
                 FILTER(?type = dbo:Person || ?type = dbo:Actor)
-                FILTER(LANG(?label) = "en")
-                FILTER(REGEX(?label, "^${actorName}$", "i"))
+                FILTER(LANG(?label) = "en" || LANG(?label) = "fr")
+                FILTER(REGEX(?label, "^${safeActorName}$", "i"))
             }
             UNION
             {
                 # Recherche partielle par label
                 ?actor rdfs:label ?label .
                 ?actor rdf:type dbo:Person .
-                FILTER(LANG(?label) = "en")
-                FILTER(REGEX(?label, "${actorName}", "i"))
+                FILTER(LANG(?label) = "en" || LANG(?label) = "fr")
+                FILTER(REGEX(?label, "${safeActorName}", "i"))
             }
         }
-        LIMIT 10
+        LIMIT 50
     `;
 
     try {
