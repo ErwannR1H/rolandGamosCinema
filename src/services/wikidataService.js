@@ -43,10 +43,15 @@ export async function findActorOnWikidata(actorName) {
             const isActor = await checkIfActor(entityId);
             
             if (isActor) {
+                // Récupérer l'image de l'acteur si disponible
+                const imageUrl = await getActorImage(entityId);
+                
                 return {
                     actor: `http://www.wikidata.org/entity/${entityId}`,
                     label: result.label,
-                    description: result.description || ''
+                    description: result.description || '',
+                    wikidataUrl: `https://www.wikidata.org/wiki/${entityId}`,
+                    imageUrl: imageUrl
                 };
             }
         }
@@ -86,6 +91,41 @@ async function checkIfActor(entityId) {
     } catch (error) {
         console.error('Erreur vérification acteur:', error);
         return false;
+    }
+}
+
+/**
+ * Récupère l'image d'un acteur depuis Wikidata
+ * @param {string} entityId - ID de l'entité Wikidata (ex: Q123)
+ * @returns {Promise<string|null>}
+ */
+async function getActorImage(entityId) {
+    const query = `
+        SELECT ?image WHERE {
+            wd:${entityId} wdt:P18 ?image .
+        }
+        LIMIT 1
+    `;
+
+    try {
+        const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
+            query: query,
+            format: 'json'
+        });
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            return null;
+        }
+
+        const data = await response.json();
+        if (data.results.bindings.length > 0) {
+            return data.results.bindings[0].image.value;
+        }
+        return null;
+    } catch (error) {
+        console.error('Erreur récupération image:', error);
+        return null;
     }
 }
 

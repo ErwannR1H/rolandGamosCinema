@@ -89,11 +89,11 @@ function App() {
     clearMessages();
 
     try {
-      // Rechercher l'acteur sur DBpedia
+      // Rechercher l'acteur sur Wikidata
       const actor = await findActor(actorName);
 
       if (!actor) {
-        addMessage('Acteur non trouvé sur DBpedia. Essayez un autre nom.', 'error');
+        addMessage('Acteur non trouvé sur Wikidata. Essayez un autre nom.', 'error');
         setIsLoading(false);
         return;
       }
@@ -157,12 +157,30 @@ function App() {
     color: 'white'
   });
 
+  // Dégradé de couleur basé sur le joueur actuel
+  const getBackgroundGradient = () => {
+    if (!gameState.isGameActive) {
+      return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    }
+    return gameState.currentPlayer === 1
+      ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' // Bleu/Violet pour joueur 1
+      : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'; // Rose/Rouge pour joueur 2
+  };
+
+  const getBorderColor = () => {
+    if (!gameState.isGameActive) {
+      return '#667eea';
+    }
+    return gameState.currentPlayer === 1 ? '#667eea' : '#f5576c';
+  };
+
   return (
     <div style={{
       fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: getBackgroundGradient(),
       minHeight: '100vh',
-      padding: '20px'
+      padding: '20px',
+      transition: 'background 0.5s ease'
     }}>
       <div style={{
         maxWidth: '800px',
@@ -176,7 +194,8 @@ function App() {
           textAlign: 'center',
           marginBottom: '30px',
           paddingBottom: '20px',
-          borderBottom: '3px solid #667eea'
+          borderBottom: `3px solid ${getBorderColor()}`,
+          transition: 'border-color 0.5s ease'
         }}>
           <h1 style={{ color: '#333', fontSize: '2.5em', marginBottom: '10px' }}>
             🎬 Jeu des Acteurs
@@ -187,28 +206,45 @@ function App() {
         </header>
 
         <main>
-          <GameStatus 
-            currentPlayer={gameState.currentPlayer}
-            scores={gameState.scores}
-            isGameActive={gameState.isGameActive}
-          />
+          {gameState.isGameActive && (
+            <>
+              <GameStatus 
+                currentPlayer={gameState.currentPlayer}
+                scores={gameState.scores}
+                isGameActive={gameState.isGameActive}
+              />
 
-          <LastActor lastActor={gameState.lastActor} />
+              <LastActor lastActor={gameState.lastActor} />
 
-          <ActorInput 
-            value={actorInput}
-            onChange={setActorInput}
-            onSubmit={handleSubmit}
-            onGiveUp={handleGiveUp}
-            isGameActive={gameState.isGameActive}
-            isLoading={isLoading}
-          />
+              <ActorInput 
+                value={actorInput}
+                onChange={setActorInput}
+                onSubmit={handleSubmit}
+                onGiveUp={handleGiveUp}
+                isGameActive={gameState.isGameActive}
+                isLoading={isLoading}
+              />
 
-          <MessageContainer messages={messages} />
+              <MessageContainer messages={messages} />
 
-          <ActorsHistory actors={gameState.actorsHistory} />
+              <ActorsHistory actors={gameState.actorsHistory} />
 
-          <Loading isLoading={isLoading} />
+              <Loading isLoading={isLoading} />
+            </>
+          )}
+
+          {!gameState.isGameActive && (
+            <div style={{
+              textAlign: 'center',
+              padding: '40px 20px',
+              color: '#666'
+            }}>
+              <p style={{ fontSize: '1.2em', marginBottom: '20px' }}>
+                Cliquez sur "Nouvelle Partie" pour commencer à jouer !
+              </p>
+              <MessageContainer messages={messages} />
+            </div>
+          )}
         </main>
 
         <div style={{
