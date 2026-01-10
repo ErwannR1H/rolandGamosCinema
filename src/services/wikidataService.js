@@ -71,7 +71,15 @@ export async function findActorOnWikidata(actorName) {
 async function checkIfActor(entityId) {
     const query = `
         ASK {
-            wd:${entityId} wdt:P106 wd:Q33999 .
+            {
+                wd:${entityId} wdt:P106 wd:Q33999 .  # acteur/actrice
+            } UNION {
+                wd:${entityId} wdt:P106 wd:Q10800557 .  # acteur de cinéma
+            } UNION {
+                wd:${entityId} wdt:P106 wd:Q10798782 .  # acteur de télévision
+            } UNION {
+                wd:${entityId} wdt:P106 wd:Q948329 .  # acteur de théâtre
+            }
         }
     `;
 
@@ -130,6 +138,41 @@ async function getActorImage(entityId) {
 }
 
 /**
+ * Récupère l'affiche d'un film depuis Wikidata
+ * @param {string} movieId - ID du film Wikidata (ex: Q123)
+ * @returns {Promise<string|null>}
+ */
+async function getMoviePoster(movieId) {
+    const query = `
+        SELECT ?poster WHERE {
+            wd:${movieId} wdt:P18 ?poster .
+        }
+        LIMIT 1
+    `;
+
+    try {
+        const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
+            query: query,
+            format: 'json'
+        });
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            return null;
+        }
+
+        const data = await response.json();
+        if (data.results.bindings.length > 0) {
+            return data.results.bindings[0].poster.value;
+        }
+        return null;
+    } catch (error) {
+        console.error('Erreur récupération affiche film:', error);
+        return null;
+    }
+}
+
+/**
  * Vérifie si deux acteurs ont joué dans un film commun sur Wikidata
  * Méthode robuste : récupère tous les films de chaque acteur et trouve l'intersection
  * @param {string} actor1Uri - URI du premier acteur
@@ -175,9 +218,15 @@ export async function findCommonMovieOnWikidata(actor1Uri, actor2Uri) {
             return null;
         }
 
+        // Récupérer l'affiche du premier film commun
+        const firstMovie = commonMovies[0];
+        const movieId = firstMovie.movie.split('/').pop();
+        const posterUrl = await getMoviePoster(movieId);
+
         return {
-            movie: commonMovies[0].movie,
-            movieLabel: commonMovies[0].movieLabel,
+            movie: firstMovie.movie,
+            movieLabel: firstMovie.movieLabel,
+            moviePosterUrl: posterUrl,
             source: 'Wikidata'
         };
     } catch (error) {

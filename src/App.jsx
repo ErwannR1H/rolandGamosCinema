@@ -57,7 +57,7 @@ function App() {
       return {
         ...prev,
         lastActor: actor,
-        actorsHistory: [...prev.actorsHistory, actor],
+        actorsHistory: [...prev.actorsHistory, { ...actor, player: prev.currentPlayer }],
         scores: newScores,
         currentPlayer: prev.currentPlayer === 1 ? 2 : 1
       };
@@ -118,12 +118,12 @@ function App() {
         return;
       }
 
-      // Réponse valide
+      // Réponse valide - ajouter l'affiche du film à l'acteur
       addMessage(
         `✓ Correct ! Film commun: "${commonMovie.movieLabel}"`,
         'success'
       );
-      acceptActor(actor);
+      acceptActor({ ...actor, moviePosterUrl: commonMovie.moviePosterUrl });
 
     } catch (error) {
       console.error('Erreur:', error);
@@ -144,18 +144,22 @@ function App() {
     endGame(winner);
   };
 
-  const buttonStyle = (isPrimary) => ({
-    flex: 1,
-    padding: '15px 25px',
-    border: 'none',
-    borderRadius: '10px',
-    fontSize: '1em',
-    cursor: 'pointer',
-    transition: 'all 0.3s',
-    fontWeight: '600',
-    background: isPrimary ? '#667eea' : '#6c757d',
-    color: 'white'
-  });
+  const buttonStyle = (isPrimary) => {
+    const baseColor = gameState.currentPlayer === 1 ? '#667eea' : '#f5576c';
+    
+    return {
+      flex: 1,
+      padding: '15px 25px',
+      border: 'none',
+      borderRadius: '10px',
+      fontSize: '1em',
+      cursor: 'pointer',
+      transition: 'all 0.3s',
+      fontWeight: '600',
+      background: isPrimary ? baseColor : '#6c757d',
+      color: 'white'
+    };
+  };
 
   // Dégradé de couleur basé sur le joueur actuel
   const getBackgroundGradient = () => {

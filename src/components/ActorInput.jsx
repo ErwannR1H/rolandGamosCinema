@@ -1,17 +1,29 @@
 import React from 'react';
 
 function ActorInput({ value, onChange, onSubmit, onGiveUp, isGameActive, isLoading }) {
-  const buttonStyle = (isPrimary) => ({
-    padding: '15px 25px',
-    border: 'none',
-    borderRadius: '10px',
-    fontSize: '1em',
-    cursor: isGameActive && !isLoading ? 'pointer' : 'not-allowed',
-    transition: 'all 0.3s',
-    fontWeight: '600',
-    background: isGameActive && !isLoading ? (isPrimary ? '#667eea' : '#6c757d') : '#ccc',
-    color: 'white'
-  });
+  const buttonStyle = (type) => {
+    let bgColor = '#ccc';
+    
+    if (isGameActive && !isLoading) {
+      if (type === 'submit') {
+        bgColor = '#28a745'; // Vert pour valider
+      } else if (type === 'giveup') {
+        bgColor = '#dc3545'; // Rouge pour abandonner
+      }
+    }
+    
+    return {
+      padding: '15px 25px',
+      border: 'none',
+      borderRadius: '10px',
+      fontSize: '1em',
+      cursor: isGameActive && !isLoading ? 'pointer' : 'not-allowed',
+      transition: 'all 0.3s',
+      fontWeight: '600',
+      background: bgColor,
+      color: 'white'
+    };
+  };
 
   return (
     <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
@@ -31,10 +43,10 @@ function ActorInput({ value, onChange, onSubmit, onGiveUp, isGameActive, isLoadi
           fontSize: '1em'
         }}
       />
-      <button onClick={onSubmit} disabled={!isGameActive || isLoading} style={buttonStyle(true)}>
+      <button onClick={onSubmit} disabled={!isGameActive || isLoading} style={buttonStyle('submit')}>
         Valider
       </button>
-      <button onClick={onGiveUp} disabled={!isGameActive || isLoading} style={buttonStyle(false)}>
+      <button onClick={onGiveUp} disabled={!isGameActive || isLoading} style={buttonStyle('giveup')}>
         Abandonner
       </button>
     </div>

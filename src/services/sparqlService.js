@@ -23,19 +23,26 @@ export async function findActor(actorName) {
     
     // Étape 2 : Si échec, utiliser l'IA pour corriger le nom
     console.log(`❌ Pas trouvé directement, utilisation de l'IA...`);
-    const improvedName = await improveActorNameForDBpedia(actorName);
     
-    // Si l'IA retourne le même nom, pas la peine de réessayer
-    if (improvedName.toLowerCase() === actorName.toLowerCase()) {
-        console.log(`ℹ️ L'IA n'a pas changé le nom`);
-        return null;
-    }
-    
-    // Étape 3 : Réessayer avec le nom amélioré
-    const aiResult = await searchActor(improvedName);
-    if (aiResult) {
-        console.log(`✅ Trouvé avec le nom corrigé par l'IA sur Wikidata!`);
-        return aiResult;
+    try {
+        const improvedName = await improveActorNameForDBpedia(actorName);
+        
+        console.log(`🤖 IA suggère: "${improvedName}"`);
+        
+        // Si l'IA retourne le même nom ou un nom vide, pas la peine de réessayer
+        if (!improvedName || improvedName.toLowerCase().trim() === actorName.toLowerCase().trim()) {
+            console.log(`ℹ️ L'IA n'a pas changé le nom de manière significative`);
+            return null;
+        }
+        
+        // Étape 3 : Réessayer avec le nom amélioré
+        const aiResult = await searchActor(improvedName);
+        if (aiResult) {
+            console.log(`✅ Trouvé avec le nom corrigé par l'IA sur Wikidata!`);
+            return aiResult;
+        }
+    } catch (error) {
+        console.error(`❌ Erreur avec l'IA:`, error);
     }
     
     console.log(`❌ Acteur non trouvé même après correction IA`);

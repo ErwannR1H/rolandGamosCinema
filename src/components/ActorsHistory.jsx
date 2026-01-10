@@ -5,6 +5,12 @@ function ActorsHistory({ actors }) {
     return null;
   }
 
+  const getPlayerGradient = (player) => {
+    return player === 1
+      ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+  };
+
   return (
     <div style={{ marginTop: '30px' }}>
       <h3 style={{ color: '#333', marginBottom: '15px' }}>Acteurs déjà mentionnés:</h3>
@@ -14,13 +20,18 @@ function ActorsHistory({ actors }) {
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: getPlayerGradient(actor.player || 1),
             color: 'white',
             padding: '10px 15px',
             borderRadius: '25px',
             fontSize: '0.9em',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-          }}>
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            transition: 'transform 0.2s',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
             {actor.imageUrl && (
               <img 
                 src={actor.imageUrl} 
@@ -52,6 +63,20 @@ function ActorsHistory({ actors }) {
                 </a>
               )}
             </div>
+            {actor.moviePosterUrl && (
+              <img 
+                src={actor.moviePosterUrl} 
+                alt="Affiche du film"
+                style={{
+                  width: '30px',
+                  height: '45px',
+                  borderRadius: '4px',
+                  objectFit: 'cover',
+                  border: '1px solid white',
+                  marginLeft: '5px'
+                }}
+              />
+            )}
           </div>
         ))}
       </div>

@@ -52,7 +52,7 @@ function RulesModal({ isOpen, onClose }) {
             Si un joueur répète un acteur ou ne trouve pas de réponse valide, il perd
           </li>
           <li style={{ marginBottom: '10px', lineHeight: '1.6' }}>
-            Les données proviennent de DBpedia
+            Les données proviennent de Wikidata
           </li>
         </ol>
       </div>
