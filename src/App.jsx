@@ -7,8 +7,109 @@ import ActorsHistory from './components/ActorsHistory';
 import Loading from './components/Loading';
 import RulesModal from './components/RulesModal';
 import { findActor, haveCommonMovie } from './services/sparqlService';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
-function App() {
+function Accueil() {
+  const buttonStyle = {
+    flex: 1,
+    padding: '15px 25px',
+    border: 'none',
+    borderRadius: '10px',
+    fontSize: '1em',
+    cursor: 'pointer',
+    transition: 'all 0.3s',
+    fontWeight: '600',
+    background: '#667eea',
+    color: 'white',
+    textDecoration: 'none',
+    display: 'inline-block'
+  };
+
+  return (
+    <div style={{
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      minHeight: '100vh',
+      padding: '20px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <div style={{
+        maxWidth: '800px',
+        width: '100%',
+        background: 'white',
+        borderRadius: '20px',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+        padding: '30px'
+      }}>
+        <header style={{
+          textAlign: 'center',
+          marginBottom: '30px',
+          paddingBottom: '20px',
+          borderBottom: '3px solid #667eea'
+        }}>
+          <h1 style={{ color: '#333', fontSize: '2.5em', marginBottom: '10px' }}>
+            Bienvenue sur notre plateforme d'analyse cinématographique
+          </h1>
+          <p style={{ color: '#666', fontSize: '1.1em' }}>
+            Enrichir & Tester ses connaissances cinématographiques
+          </p>
+        </header>
+
+        <main style={{ marginBottom: '30px' }}>
+          <div style={{
+            background: '#f8f9fa',
+            padding: '30px',
+            borderRadius: '15px',
+            marginBottom: '30px'
+          }}>
+            <h2 style={{ color: '#333', fontSize: '1.5em', marginBottom: '15px' }}>
+              À propos de l'application 
+            </h2>
+            <p style={{ color: '#666', fontSize: '1.1em', lineHeight: '1.6' }}>
+              TODO Description
+            </p>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            gap: '15px',
+            flexDirection: 'column'
+          }}>
+            <Link to="/game" style={{ textDecoration: 'none' }}>
+              <button style={{ ...buttonStyle, width: '100%' }}>
+                Tester maintenant ses connaissances, seul ou à plusieurs !
+              </button>
+            </Link>
+            
+            <Link to="/about" style={{ textDecoration: 'none' }}>
+              <button style={{ 
+                ...buttonStyle, 
+                width: '100%',
+                background: '#6c757d'
+              }}>
+                Vers analyse de data (TODO)
+              </button>
+            </Link>
+          </div>
+        </main>
+
+        <footer style={{
+          textAlign: 'center',
+          paddingTop: '20px',
+          borderTop: '2px solid #eee',
+          color: '#999',
+          fontSize: '0.9em'
+        }}>
+          Propulsé par Wikidata & SPARQL
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function Game() {
   const [gameState, setGameState] = useState({
     currentPlayer: 1,
     scores: { player1: 0, player2: 0 },
@@ -272,6 +373,21 @@ function App() {
         />
       </div>
     </div>
+  );
+}
+
+// 3. Le composant principal qui gère la navigation
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* La route racine "/" affiche l'accueil */}
+        <Route path="/" element={<Accueil />} />
+        
+        {/* La route "/dashboard" affiche votre contenu actuel */}
+        <Route path="/game" element={<Game />} />
+      </Routes>
+    </Router>
   );
 }
 
