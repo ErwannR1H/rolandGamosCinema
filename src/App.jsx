@@ -8,6 +8,8 @@ import Loading from './components/Loading';
 import RulesModal from './components/RulesModal';
 import ChallengeSetup from './components/ChallengeSetup';
 import ChallengeGame from './components/ChallengeGame';
+import NetworkAnalysis from './components/NetworkAnalysis';
+import SoloGame from './components/SoloGame';
 import { findActor, haveCommonMovie } from './services/sparqlService';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
@@ -150,13 +152,39 @@ function Accueil() {
             gap: '15px',
             flexDirection: 'column'
           }}>
+            <Link to="/game" style={{ textDecoration: 'none' }}>
+              <button style={{ ...buttonStyle, width: '100%' }}>
+                👥 Mode Multijoueur - Défiez vos amis !
+              </button>
+            </Link>
+            
+            <Link to="/analysis" style={{ textDecoration: 'none' }}>
+              <button style={{ 
+                ...buttonStyle, 
+                width: '100%',
+                background: '#6c757d'
+              }}>
+                📊 Analyse du réseau d'acteurs
+              </button>
+            </Link>
+
+            <Link to="/solo" style={{ textDecoration: 'none' }}>
+              <button style={{
+                ...buttonStyle,
+                width: '100%',
+                background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'
+              }}>
+                🤖 Mode Solo - Défiez l'IA !
+              </button>
+            </Link>
+
             <Link to="/about" style={{ textDecoration: 'none' }}>
               <button style={{ 
                 ...buttonStyle, 
                 width: '100%',
                 background: '#6c757d'
               }}>
-                Vers analyse de data (TODO)
+                À propos
               </button>
             </Link>
           </div>
@@ -213,7 +241,7 @@ function Game() {
 
   const endGame = (winner) => {
     setGameState(prev => ({ ...prev, isGameActive: false }));
-    addMessage(`🏆 Fin de partie ! Le Joueur ${winner} remporte la victoire !`, 'success');
+    addMessage(`Fin de partie ! Le Joueur ${winner} remporte la victoire !`, 'success');
   };
 
   const acceptActor = (actor) => {
@@ -431,6 +459,12 @@ function Game() {
                 Cliquez sur "Nouvelle Partie" pour commencer à jouer !
               </p>
               <MessageContainer messages={messages} />
+
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '10px' }}>
+                <Link to="/" style={{ textDecoration: 'none' }}>
+                  <button style={{ ...buttonStyle(false) }}>Retour à l'accueil</button>
+                </Link>
+              </div>
             </div>
           )}
         </main>
@@ -445,6 +479,11 @@ function Game() {
           <button onClick={startNewGame} style={buttonStyle(true)}>
             Nouvelle Partie
           </button>
+          {gameState.isGameActive && ((gameState.playerCount || playerCount) > 1) && (
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <button style={{ ...buttonStyle(false) }}>Retour à l'accueil</button>
+            </Link>
+          )}
           <button onClick={() => setIsRulesOpen(true)} style={buttonStyle(false)}>
             Règles
           </button>
@@ -487,6 +526,16 @@ function App() {
         
         {/* Mode défi (solo) */}
         <Route path="/defi" element={<ChallengeMode />} />
+        {/* La route "/game" affiche le jeu */}
+
+        {/* La route "/game" affiche le mode multijoueur */}
+        <Route path="/game" element={<Game />} />
+        
+        {/* La route "/analysis" affiche l'analyse du réseau */}
+        <Route path="/analysis" element={<NetworkAnalysis />} />
+
+        {/* La route "/solo" affiche le mode solo contre l'IA */}
+        <Route path="/solo" element={<SoloGame />} />
       </Routes>
     </Router>
   );
