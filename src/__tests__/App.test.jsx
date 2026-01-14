@@ -40,4 +40,11 @@ describe('App', () => {
     const aboutLink = screen.getByText(/Vers analyse de data/i).closest('a');
     expect(aboutLink).toHaveAttribute('href', '/about');
   });
+
+  test('DOIT FAIL', () => {
+    render(<App />);
+    
+    const aboutLink = screen.getByText(/Vers analyse de data/i).closest('a');
+    expect(aboutLink).toHaveAttribute('href', '/FAILLL');
+  });
 });
