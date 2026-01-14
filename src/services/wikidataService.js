@@ -146,6 +146,12 @@ async function getActorImage(entityId) {
  */
 export async function findCommonMovieOnWikidata(actor1Uri, actor2Uri) {
     try {
+        // Vérifier que les URIs sont valides
+        if (!actor1Uri || !actor2Uri) {
+            console.error('URIs invalides:', { actor1Uri, actor2Uri });
+            return null;
+        }
+        
         // Extraire l'ID Wikidata de l'URI
         const actor1Id = actor1Uri.split('/').pop();
         const actor2Id = actor2Uri.split('/').pop();
@@ -200,6 +206,7 @@ export async function findCommonMovieOnWikidata(actor1Uri, actor2Uri) {
         
         return {
             movie: firstResult.movie.value,
+            title: firstResult.movieLabel.value,
             movieLabel: firstResult.movieLabel.value,
             moviePosterUrl: firstResult.poster ? firstResult.poster.value : null,
             source: 'Wikidata'
@@ -207,5 +214,335 @@ export async function findCommonMovieOnWikidata(actor1Uri, actor2Uri) {
     } catch (error) {
         console.error('Erreur vérification films communs Wikidata:', error);
         throw error;
+    }
+}
+
+/**
+ * Récupère un acteur aléatoire depuis Wikidata
+ * @returns {Promise<Object|null>}
+ */
+export async function getRandomActor() {
+    try {
+        // Requête SPARQL pour obtenir un acteur aléatoire
+        // On cherche des acteurs célèbres avec une photo
+        const query = `
+            SELECT ?actor ?actorLabel ?image WHERE {
+                # L'entité doit être un acteur
+                ?actor wdt:P106 wd:Q33999 .
+                
+                # Doit avoir une image
+                ?actor wdt:P18 ?image .
+                
+                # Doit avoir une date de naissance (pour filtrer les vrais acteurs)
+                ?actor wdt:P569 ?birthDate .
+                
+                # Doit avoir joué dans au moins un film
+                ?movie wdt:P161 ?actor .
+                ?movie wdt:P31/wdt:P279* wd:Q11424 .
+                
+                SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
+            }
+            LIMIT 100
+        `;
+
+        const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
+            query: query,
+            format: 'json'
+        });
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.warn(`Erreur SPARQL random actor: ${response.status}`);
+            return null;
+        }
+
+        const data = await response.json();
+        const results = data.results.bindings;
+
+        if (results.length === 0) {
+            console.log('Aucun acteur aléatoire trouvé');
+            return null;
+        }
+
+        // Sélectionner un acteur au hasard parmi les résultats
+        const randomIndex = Math.floor(Math.random() * results.length);
+        const randomActor = results[randomIndex];
+        
+        const actorId = randomActor.actor.value.split('/').pop();
+
+        return {
+            actor: randomActor.actor.value,
+            label: randomActor.actorLabel.value,
+            description: '',
+            wikidataUrl: `https://www.wikidata.org/wiki/${actorId}`,
+            imageUrl: randomActor.image ? randomActor.image.value : null
+        };
+    } catch (error) {
+        console.error('Erreur récupération acteur aléatoire:', error);
+        return null;
+    }
+}
+
+/**
+ * Génère un défi aléatoire avec un chemin pré-calculé
+ * @param {number} minLength - Longueur minimale du chemin (par défaut 3)
+ * @param {number} maxLength - Longueur maximale du chemin (par défaut 8)
+ * @returns {Promise<Object|null>} - {startActor, endActor, path}
+ */
+export async function generateRandomChallenge(minLength = 3, maxLength = 8) {
+    try {
+        console.log('Génération d\'un défi aléatoire...');
+        
+        // 1. Choisir un acteur de départ aléatoire
+        const startActor = await getRandomActor();
+        if (!startActor) {
+            console.error('Impossible de récupérer un acteur de départ');
+            return null;
+        }
+        
+        console.log(`Acteur de départ: ${startActor.label}`);
+        
+        // 2. Déterminer la longueur du chemin aléatoire
+        const pathLength = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
+        console.log(`Longueur du chemin: ${pathLength} étapes`);
+        
+        // 3. Construire le chemin aléatoire
+        const path = [];
+        let currentActor = startActor;
+        
+        for (let i = 0; i < pathLength; i++) {
+            // Récupérer les films de l'acteur actuel
+            const films = await getActorFilms(currentActor.actor);
+            
+            if (!films || films.length === 0) {
+                console.error(`Aucun film trouvé pour ${currentActor.label}`);
+                return null;
+            }
+            
+            // Choisir un film aléatoire
+            const randomFilm = films[Math.floor(Math.random() * films.length)];
+            
+            // Récupérer les co-acteurs de ce film
+            const coActors = await getFilmActors(randomFilm.movie, currentActor.actor);
+            
+            if (!coActors || coActors.length === 0) {
+                console.error(`Aucun co-acteur trouvé dans ${randomFilm.title}`);
+                return null;
+            }
+            
+            // Choisir un co-acteur aléatoire
+            const nextActor = coActors[Math.floor(Math.random() * coActors.length)];
+            
+            // Ajouter cette étape au chemin
+            path.push({
+                currentActor: currentActor.actor,
+                currentActorLabel: currentActor.label,
+                film: randomFilm,
+                nextActor: nextActor
+            });
+            
+            console.log(`Étape ${i + 1}: ${currentActor.label} -> ${randomFilm.title} -> ${nextActor.label}`);
+            
+            // Le prochain acteur devient l'acteur actuel
+            currentActor = nextActor;
+        }
+        
+        // 4. Le dernier acteur du chemin est l'acteur cible
+        const endActor = currentActor;
+        
+        console.log(`Défi généré: ${startActor.label} -> ${endActor.label} (${pathLength} étapes)`);
+        
+        return {
+            startActor,
+            endActor,
+            path,
+            pathLength
+        };
+    } catch (error) {
+        console.error('Erreur génération défi aléatoire:', error);
+        return null;
+    }
+}
+
+/**
+ * Récupère tous les films dans lesquels un acteur a joué
+ * @param {string} actorUri - URI de l'acteur
+ * @returns {Promise<Array>}
+ */
+async function getActorFilms(actorUri) {
+    try {
+        const actorId = actorUri.split('/').pop();
+        
+        const query = `
+            SELECT DISTINCT ?movie ?movieLabel WHERE {
+                ?movie wdt:P161 wd:${actorId} .
+                
+                {
+                    ?movie wdt:P31/wdt:P279* wd:Q11424 .
+                } UNION {
+                    ?movie wdt:P31/wdt:P279* wd:Q5398426 .
+                }
+                
+                SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
+            }
+            LIMIT 50
+        `;
+        
+        const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
+            query: query,
+            format: 'json'
+        });
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+            return [];
+        }
+        
+        const data = await response.json();
+        return data.results.bindings.map(b => ({
+            movie: b.movie.value,
+            title: b.movieLabel.value
+        }));
+    } catch (error) {
+        console.error('Erreur récupération films acteur:', error);
+        return [];
+    }
+}
+
+/**
+ * Récupère tous les acteurs d'un film (sauf l'acteur spécifié)
+ * @param {string} movieUri - URI du film
+ * @param {string} excludeActorUri - URI de l'acteur à exclure
+ * @returns {Promise<Array>}
+ */
+async function getFilmActors(movieUri, excludeActorUri) {
+    try {
+        const movieId = movieUri.split('/').pop();
+        const excludeActorId = excludeActorUri.split('/').pop();
+        
+        const query = `
+            SELECT DISTINCT ?actor ?actorLabel ?image WHERE {
+                wd:${movieId} wdt:P161 ?actor .
+                
+                FILTER(?actor != wd:${excludeActorId})
+                
+                ?actor wdt:P106 wd:Q33999 .
+                
+                OPTIONAL { ?actor wdt:P18 ?image . }
+                
+                SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
+            }
+            LIMIT 20
+        `;
+        
+        const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
+            query: query,
+            format: 'json'
+        });
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+            return [];
+        }
+        
+        const data = await response.json();
+        return data.results.bindings.map(b => {
+            const actorId = b.actor.value.split('/').pop();
+            return {
+                actor: b.actor.value,
+                label: b.actorLabel.value,
+                imageUrl: b.image ? b.image.value : null,
+                wikidataUrl: `https://www.wikidata.org/wiki/${actorId}`
+            };
+        });
+    } catch (error) {
+        console.error('Erreur récupération acteurs film:', error);
+        return [];
+    }
+}
+
+/**
+ * Génère un chemin aléatoire depuis un acteur de départ vers un acteur cible
+ * @param {Object} startActor - Acteur de départ {actor, label, imageUrl, wikidataUrl}
+ * @param {Object} targetActor - Acteur cible {actor, label, imageUrl, wikidataUrl}
+ * @param {number} maxLength - Longueur maximale du chemin (par défaut 5)
+ * @returns {Promise<Array|null>} - Tableau du chemin [{currentActor, film, nextActor}]
+ */
+export async function generatePathBetweenActors(startActor, targetActor, maxLength = 5) {
+    try {
+        console.log(`Génération d'un chemin de ${startActor.label} vers ${targetActor.label}...`);
+        
+        // Déterminer une longueur aléatoire entre 2 et maxLength
+        const pathLength = Math.floor(Math.random() * (maxLength - 1)) + 2;
+        console.log(`Longueur du chemin: ${pathLength} étapes`);
+        
+        const path = [];
+        let currentActor = startActor;
+        
+        for (let i = 0; i < pathLength - 1; i++) {
+            // Récupérer les films de l'acteur actuel
+            const films = await getActorFilms(currentActor.actor);
+            
+            if (!films || films.length === 0) {
+                console.error(`Aucun film trouvé pour ${currentActor.label}`);
+                return null;
+            }
+            
+            // Choisir un film aléatoire
+            const randomFilm = films[Math.floor(Math.random() * films.length)];
+            
+            // Récupérer les co-acteurs de ce film
+            const coActors = await getFilmActors(randomFilm.movie, currentActor.actor);
+            
+            if (!coActors || coActors.length === 0) {
+                console.error(`Aucun co-acteur trouvé dans ${randomFilm.title}`);
+                return null;
+            }
+            
+            // Choisir un co-acteur aléatoire
+            const nextActor = coActors[Math.floor(Math.random() * coActors.length)];
+            
+            // Ajouter cette étape au chemin
+            path.push({
+                currentActor: currentActor.actor,
+                currentActorLabel: currentActor.label,
+                film: randomFilm,
+                nextActor: nextActor
+            });
+            
+            console.log(`Étape ${i + 1}: ${currentActor.label} -> ${randomFilm.title} -> ${nextActor.label}`);
+            
+            // Le prochain acteur devient l'acteur actuel
+            currentActor = nextActor;
+        }
+        
+        // Dernière étape : trouver un film commun entre le dernier acteur et l'acteur cible
+        const lastActor = currentActor;
+        const finalMovie = await findCommonMovieOnWikidata(lastActor.actor, targetActor.actor);
+        
+        if (!finalMovie) {
+            console.error(`Aucun film commun trouvé entre ${lastActor.label} et ${targetActor.label}`);
+            // Essayer avec un chemin plus court
+            if (pathLength > 2) {
+                return await generatePathBetweenActors(startActor, targetActor, pathLength - 1);
+            }
+            return null;
+        }
+        
+        // Ajouter la dernière étape
+        path.push({
+            currentActor: lastActor.actor,
+            currentActorLabel: lastActor.label,
+            film: finalMovie,
+            nextActor: targetActor
+        });
+        
+        console.log(`Dernière étape: ${lastActor.label} -> ${finalMovie.title} -> ${targetActor.label}`);
+        console.log(`Chemin généré avec succès (${path.length} étapes)`);
+        
+        return path;
+    } catch (error) {
+        console.error('Erreur génération chemin entre acteurs:', error);
+        return null;
     }
 }

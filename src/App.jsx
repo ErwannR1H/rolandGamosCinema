@@ -6,6 +6,8 @@ import MessageContainer from './components/MessageContainer';
 import ActorsHistory from './components/ActorsHistory';
 import Loading from './components/Loading';
 import RulesModal from './components/RulesModal';
+import ChallengeSetup from './components/ChallengeSetup';
+import ChallengeGame from './components/ChallengeGame';
 import NetworkAnalysis from './components/NetworkAnalysis';
 import SoloGame from './components/SoloGame';
 import { findActor, haveCommonMovie } from './services/sparqlService';
@@ -52,7 +54,7 @@ function Accueil() {
           borderBottom: '3px solid #667eea'
         }}>
           <h1 style={{ color: '#333', fontSize: '2.5em', marginBottom: '10px' }}>
-            Bienvenue sur notre plateforme d'analyse cinématographique
+            🎬 Bienvenue sur notre plateforme d'analyse cinématographique
           </h1>
           <p style={{ color: '#666', fontSize: '1.1em' }}>
             Enrichir & Tester ses connaissances cinématographiques
@@ -67,11 +69,82 @@ function Accueil() {
             marginBottom: '30px'
           }}>
             <h2 style={{ color: '#333', fontSize: '1.5em', marginBottom: '15px' }}>
-              À propos de l'application 
+              Choisissez votre mode de jeu
             </h2>
             <p style={{ color: '#666', fontSize: '1.1em', lineHeight: '1.6' }}>
-              TODO Description
+              Deux modes disponibles pour tester vos connaissances cinématographiques
             </p>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '20px',
+            marginBottom: '30px'
+          }}>
+            <Link 
+              to="/classique" 
+              style={{
+                background: 'white',
+                padding: '25px',
+                borderRadius: '15px',
+                border: '2px solid #667eea',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                textAlign: 'center',
+                textDecoration: 'none',
+                color: 'inherit',
+                display: 'block'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-5px)';
+                e.currentTarget.style.boxShadow = '0 8px 30px rgba(102, 126, 234, 0.3)';
+                e.currentTarget.style.borderColor = '#5568d3';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.borderColor = '#667eea';
+              }}
+            >
+              <div style={{ fontSize: '3em', marginBottom: '10px' }}>🎮</div>
+              <h3 style={{ color: '#667eea', marginBottom: '10px', fontSize: '1.3em' }}>Mode Classique</h3>
+              <p style={{ color: '#666', lineHeight: '1.6', fontSize: '0.95em' }}>
+                Deux joueurs s'affrontent pour trouver des acteurs ayant joué ensemble
+              </p>
+            </Link>
+
+            <Link 
+              to="/defi" 
+              style={{
+                background: 'white',
+                padding: '25px',
+                borderRadius: '15px',
+                border: '2px solid #f5576c',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                textAlign: 'center',
+                textDecoration: 'none',
+                color: 'inherit',
+                display: 'block'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-5px)';
+                e.currentTarget.style.boxShadow = '0 8px 30px rgba(245, 87, 108, 0.3)';
+                e.currentTarget.style.borderColor = '#e4465b';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.borderColor = '#f5576c';
+              }}
+            >
+              <div style={{ fontSize: '3em', marginBottom: '10px' }}>🎯</div>
+              <h3 style={{ color: '#f5576c', marginBottom: '10px', fontSize: '1.3em' }}>Mode Défi</h3>
+              <p style={{ color: '#666', lineHeight: '1.6', fontSize: '0.95em' }}>
+                Trouvez le chemin le plus court entre deux acteurs
+              </p>
+            </Link>
           </div>
 
           <div style={{
@@ -106,8 +179,8 @@ function Accueil() {
             </Link>
 
             <Link to="/about" style={{ textDecoration: 'none' }}>
-              <button style={{
-                ...buttonStyle,
+              <button style={{ 
+                ...buttonStyle, 
                 width: '100%',
                 background: '#6c757d'
               }}>
@@ -317,6 +390,22 @@ function Game() {
         boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
         padding: '30px'
       }}>
+        <div style={{ marginBottom: '20px' }}>
+          <Link to="/" style={{ textDecoration: 'none' }}>
+            <button style={{
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '8px',
+              background: '#6c757d',
+              color: 'white',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}>
+              ← Retour à l'accueil
+            </button>
+          </Link>
+        </div>
+
         <header style={{
           textAlign: 'center',
           marginBottom: '30px',
@@ -369,15 +458,6 @@ function Game() {
               <p style={{ fontSize: '1.2em', marginBottom: '20px' }}>
                 Cliquez sur "Nouvelle Partie" pour commencer à jouer !
               </p>
-
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
-                <label style={{ alignSelf: 'center' }}>Joueurs :</label>
-                <select value={playerCount} onChange={(e) => setPlayerCount(Number(e.target.value))} style={{ padding: '10px', borderRadius: '8px' }}>
-                  {[1,2,3,4,5].map(n => (
-                    <option key={n} value={n}>{n}</option>
-                  ))}
-                </select>
-              </div>
               <MessageContainer messages={messages} />
 
               <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '10px' }}>
@@ -396,10 +476,6 @@ function Game() {
           paddingTop: '20px',
           borderTop: '2px solid #eee'
         }}>
-         
-          <button onClick={() => startNewGameWithCount(1)} style={{ ...buttonStyle(true), background: '#34c759' }}>
-            Mode Solo
-          </button>
           <button onClick={startNewGame} style={buttonStyle(true)}>
             Nouvelle Partie
           </button>
@@ -422,14 +498,34 @@ function Game() {
   );
 }
 
+// Composant pour gérer le mode défi
+function ChallengeMode() {
+  const [config, setConfig] = useState(null);
+
+  const handleStartChallenge = (challengeConfig) => {
+    setConfig(challengeConfig);
+  };
+
+  if (!config) {
+    return <ChallengeSetup onStartChallenge={handleStartChallenge} />;
+  }
+
+  return <ChallengeGame config={config} />;
+}
+
 // 3. Le composant principal qui gère la navigation
 function App() {
   return (
     <Router>
       <Routes>
-        {/* La route racine "/" affiche l'accueil */}
+        {/* La route racine "/" affiche l'accueil avec les modes de jeu */}
         <Route path="/" element={<Accueil />} />
         
+        {/* Mode classique (2 joueurs) */}
+        <Route path="/classique" element={<Game />} />
+        
+        {/* Mode défi (solo) */}
+        <Route path="/defi" element={<ChallengeMode />} />
         {/* La route "/game" affiche le jeu */}
 
         {/* La route "/game" affiche le mode multijoueur */}
