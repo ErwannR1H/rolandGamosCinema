@@ -9,26 +9,10 @@ import RulesModal from './components/RulesModal';
 import ChallengeSetup from './components/ChallengeSetup';
 import ChallengeGame from './components/ChallengeGame';
 import NetworkAnalysis from './components/NetworkAnalysis';
-import SoloGame from './components/SoloGame';
 import { findActor, haveCommonMovie } from './services/sparqlService';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
 function Accueil() {
-  const buttonStyle = {
-    flex: 1,
-    padding: '15px 25px',
-    border: 'none',
-    borderRadius: '10px',
-    fontSize: '1em',
-    cursor: 'pointer',
-    transition: 'all 0.3s',
-    fontWeight: '600',
-    background: '#667eea',
-    color: 'white',
-    textDecoration: 'none',
-    display: 'inline-block'
-  };
-
   return (
     <div style={{
       fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -66,29 +50,32 @@ function Accueil() {
             background: '#f8f9fa',
             padding: '30px',
             borderRadius: '15px',
-            marginBottom: '30px'
+            marginBottom: '30px',
+            textAlign: 'center'
           }}>
             <h2 style={{ color: '#333', fontSize: '1.5em', marginBottom: '15px' }}>
               Choisissez votre mode de jeu
             </h2>
             <p style={{ color: '#666', fontSize: '1.1em', lineHeight: '1.6' }}>
-              Deux modes disponibles pour tester vos connaissances cinématographiques
+              Quatre modes disponibles pour tester et enrichir vos connaissances cinématographiques
             </p>
           </div>
 
+          {/* 4 gros boutons principaux */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '20px',
             marginBottom: '30px'
           }}>
+            {/* Solo Classique */}
             <Link 
               to="/classique" 
               style={{
                 background: 'white',
-                padding: '25px',
+                padding: '30px',
                 borderRadius: '15px',
-                border: '2px solid #667eea',
+                border: '3px solid #667eea',
                 cursor: 'pointer',
                 transition: 'all 0.3s',
                 textAlign: 'center',
@@ -97,8 +84,8 @@ function Accueil() {
                 display: 'block'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-5px)';
-                e.currentTarget.style.boxShadow = '0 8px 30px rgba(102, 126, 234, 0.3)';
+                e.currentTarget.style.transform = 'translateY(-8px)';
+                e.currentTarget.style.boxShadow = '0 12px 40px rgba(102, 126, 234, 0.4)';
                 e.currentTarget.style.borderColor = '#5568d3';
               }}
               onMouseLeave={(e) => {
@@ -107,20 +94,23 @@ function Accueil() {
                 e.currentTarget.style.borderColor = '#667eea';
               }}
             >
-              <div style={{ fontSize: '3em', marginBottom: '10px' }}>🎮</div>
-              <h3 style={{ color: '#667eea', marginBottom: '10px', fontSize: '1.3em' }}>Mode Classique</h3>
-              <p style={{ color: '#666', lineHeight: '1.6', fontSize: '0.95em' }}>
-                Deux joueurs s'affrontent pour trouver des acteurs ayant joué ensemble
+              <div style={{ fontSize: '4em', marginBottom: '15px' }}>🎮</div>
+              <h3 style={{ color: '#667eea', marginBottom: '12px', fontSize: '1.4em', fontWeight: 'bold' }}>
+                Solo Classique
+              </h3>
+              <p style={{ color: '#666', lineHeight: '1.6', fontSize: '1em' }}>
+                Jouez seul et trouvez des acteurs ayant joué ensemble
               </p>
             </Link>
 
+            {/* Solo Défi */}
             <Link 
               to="/defi" 
               style={{
                 background: 'white',
-                padding: '25px',
+                padding: '30px',
                 borderRadius: '15px',
-                border: '2px solid #f5576c',
+                border: '3px solid #f5576c',
                 cursor: 'pointer',
                 transition: 'all 0.3s',
                 textAlign: 'center',
@@ -129,8 +119,8 @@ function Accueil() {
                 display: 'block'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-5px)';
-                e.currentTarget.style.boxShadow = '0 8px 30px rgba(245, 87, 108, 0.3)';
+                e.currentTarget.style.transform = 'translateY(-8px)';
+                e.currentTarget.style.boxShadow = '0 12px 40px rgba(245, 87, 108, 0.4)';
                 e.currentTarget.style.borderColor = '#e4465b';
               }}
               onMouseLeave={(e) => {
@@ -139,52 +129,109 @@ function Accueil() {
                 e.currentTarget.style.borderColor = '#f5576c';
               }}
             >
-              <div style={{ fontSize: '3em', marginBottom: '10px' }}>🎯</div>
-              <h3 style={{ color: '#f5576c', marginBottom: '10px', fontSize: '1.3em' }}>Mode Défi</h3>
-              <p style={{ color: '#666', lineHeight: '1.6', fontSize: '0.95em' }}>
-                Trouvez le chemin le plus court entre deux acteurs
+              <div style={{ fontSize: '4em', marginBottom: '15px' }}>🎯</div>
+              <h3 style={{ color: '#f5576c', marginBottom: '12px', fontSize: '1.4em', fontWeight: 'bold' }}>
+                Solo Défi
+              </h3>
+              <p style={{ color: '#666', lineHeight: '1.6', fontSize: '1em' }}>
+                Trouvez le chemin le plus court entre deux acteurs avec des indices
+              </p>
+            </Link>
+
+            {/* Multijoueur Classique */}
+            <Link 
+              to="/game" 
+              style={{
+                background: 'white',
+                padding: '30px',
+                borderRadius: '15px',
+                border: '3px solid #11998e',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                textAlign: 'center',
+                textDecoration: 'none',
+                color: 'inherit',
+                display: 'block'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-8px)';
+                e.currentTarget.style.boxShadow = '0 12px 40px rgba(17, 153, 142, 0.4)';
+                e.currentTarget.style.borderColor = '#0e8174';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.borderColor = '#11998e';
+              }}
+            >
+              <div style={{ fontSize: '4em', marginBottom: '15px' }}>👥</div>
+              <h3 style={{ color: '#11998e', marginBottom: '12px', fontSize: '1.4em', fontWeight: 'bold' }}>
+                Multijoueur Classique
+              </h3>
+              <p style={{ color: '#666', lineHeight: '1.6', fontSize: '1em' }}>
+                Affrontez vos amis en trouvant des acteurs ayant joué ensemble
+              </p>
+            </Link>
+
+            {/* Analyse du réseau */}
+            <Link 
+              to="/analysis" 
+              style={{
+                background: 'white',
+                padding: '30px',
+                borderRadius: '15px',
+                border: '3px solid #6c757d',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                textAlign: 'center',
+                textDecoration: 'none',
+                color: 'inherit',
+                display: 'block'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-8px)';
+                e.currentTarget.style.boxShadow = '0 12px 40px rgba(108, 117, 125, 0.4)';
+                e.currentTarget.style.borderColor = '#5a6268';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.borderColor = '#6c757d';
+              }}
+            >
+              <div style={{ fontSize: '4em', marginBottom: '15px' }}>📊</div>
+              <h3 style={{ color: '#6c757d', marginBottom: '12px', fontSize: '1.4em', fontWeight: 'bold' }}>
+                Analyse du Réseau
+              </h3>
+              <p style={{ color: '#666', lineHeight: '1.6', fontSize: '1em' }}>
+                Explorez les connexions entre acteurs et films
               </p>
             </Link>
           </div>
 
-          <div style={{
-            display: 'flex',
-            gap: '15px',
-            flexDirection: 'column'
-          }}>
-            <Link to="/game" style={{ textDecoration: 'none' }}>
-              <button style={{ ...buttonStyle, width: '100%' }}>
-                👥 Mode Multijoueur - Défiez vos amis !
-              </button>
-            </Link>
-            
-            <Link to="/analysis" style={{ textDecoration: 'none' }}>
-              <button style={{ 
-                ...buttonStyle, 
-                width: '100%',
-                background: '#6c757d'
-              }}>
-                📊 Analyse du réseau d'acteurs
-              </button>
-            </Link>
-
-            <Link to="/solo" style={{ textDecoration: 'none' }}>
-              <button style={{
-                ...buttonStyle,
-                width: '100%',
-                background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'
-              }}>
-                🤖 Mode Solo - Défiez l'IA !
-              </button>
-            </Link>
-
+          {/* Bouton À propos en bas */}
+          <div style={{ textAlign: 'center' }}>
             <Link to="/about" style={{ textDecoration: 'none' }}>
               <button style={{ 
-                ...buttonStyle, 
-                width: '100%',
-                background: '#6c757d'
+                padding: '12px 30px',
+                border: '2px solid #dee2e6',
+                borderRadius: '10px',
+                fontSize: '1em',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                fontWeight: '600',
+                background: 'white',
+                color: '#6c757d'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#f8f9fa';
+                e.currentTarget.style.borderColor = '#adb5bd';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'white';
+                e.currentTarget.style.borderColor = '#dee2e6';
               }}>
-                À propos
+                ℹ️ À propos
               </button>
             </Link>
           </div>
@@ -479,11 +526,6 @@ function Game() {
           <button onClick={startNewGame} style={buttonStyle(true)}>
             Nouvelle Partie
           </button>
-          {gameState.isGameActive && ((gameState.playerCount || playerCount) > 1) && (
-            <Link to="/" style={{ textDecoration: 'none' }}>
-              <button style={{ ...buttonStyle(false) }}>Retour à l'accueil</button>
-            </Link>
-          )}
           <button onClick={() => setIsRulesOpen(true)} style={buttonStyle(false)}>
             Règles
           </button>
@@ -513,29 +555,25 @@ function ChallengeMode() {
   return <ChallengeGame config={config} />;
 }
 
-// 3. Le composant principal qui gère la navigation
+// Composant principal qui gère la navigation
 function App() {
   return (
     <Router>
       <Routes>
-        {/* La route racine "/" affiche l'accueil avec les modes de jeu */}
+        {/* Page d'accueil */}
         <Route path="/" element={<Accueil />} />
         
-        {/* Mode classique (2 joueurs) */}
+        {/* Mode solo classique */}
         <Route path="/classique" element={<Game />} />
+        
+        {/* Mode multijoueur classique */}
+        <Route path="/game" element={<Game />} />
         
         {/* Mode défi (solo) */}
         <Route path="/defi" element={<ChallengeMode />} />
-        {/* La route "/game" affiche le jeu */}
-
-        {/* La route "/game" affiche le mode multijoueur */}
-        <Route path="/game" element={<Game />} />
         
-        {/* La route "/analysis" affiche l'analyse du réseau */}
+        {/* Analyse du réseau d'acteurs */}
         <Route path="/analysis" element={<NetworkAnalysis />} />
-
-        {/* La route "/solo" affiche le mode solo contre l'IA */}
-        <Route path="/solo" element={<SoloGame />} />
       </Routes>
     </Router>
   );
