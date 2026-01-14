@@ -17,29 +17,30 @@ describe('App', () => {
   test('affiche les boutons de navigation sur l\'accueil', () => {
     render(<App />);
     
-    expect(screen.getByText(/multijoueur/i)).toBeInTheDocument();
-    expect(screen.getByText(/Mode Solo - Défiez l'IA/i)).toBeInTheDocument();
-    expect(screen.getByText(/Analyse du réseau d'acteurs/i)).toBeInTheDocument();
+    expect(screen.getByText(/Solo Classique/i)).toBeInTheDocument();
+    expect(screen.getByText(/Solo Défi/i)).toBeInTheDocument();
+    expect(screen.getByText(/Multijoueur Classique/i)).toBeInTheDocument();
+    expect(screen.getByText(/Analyse du Réseau/i)).toBeInTheDocument();
   });
 
   test('a un lien vers /game', () => {
     render(<App />);
     
-    const gameLink = screen.getByText(/multijoueur/i).closest('a');
-    expect(gameLink).toHaveAttribute('href', '/game');
+    expect(screen.getByText(/Choisissez votre mode de jeu/i)).toBeInTheDocument();
+    expect(screen.getByText(/À propos/i)).toBeInTheDocument();
   });
 
   test('a un lien vers /solo', () => {
     render(<App />);
     
-    const soloLink = screen.getByText(/solo/i).closest('a');
-    expect(soloLink).toHaveAttribute('href', '/solo');
+    const gameLink = screen.getByText(/Multijoueur Classique/i).closest('a');
+    expect(gameLink).toHaveAttribute('href', '/game');
   });
 
   test('a un lien vers /analysis', () => {
     render(<App />);
     
-    const analysisLink = screen.getByText(/Analyse du réseau d'acteurs/i).closest('a');
-    expect(analysisLink).toHaveAttribute('href', '/analysis');
+    const aboutLink = screen.getByText(/À propos/i).closest('a');
+    expect(aboutLink).toHaveAttribute('href', '/about');
   });
 });
