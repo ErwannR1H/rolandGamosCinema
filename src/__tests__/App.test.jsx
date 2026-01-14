@@ -23,21 +23,21 @@ describe('App', () => {
     expect(screen.getByText(/Analyse du Réseau/i)).toBeInTheDocument();
   });
 
-  test('affiche la description sur la page d\'accueil', () => {
+  test('a un lien vers /game', () => {
     render(<App />);
     
     expect(screen.getByText(/Choisissez votre mode de jeu/i)).toBeInTheDocument();
     expect(screen.getByText(/À propos/i)).toBeInTheDocument();
   });
 
-  test('a un lien vers /game', () => {
+  test('a un lien vers /solo', () => {
     render(<App />);
     
     const gameLink = screen.getByText(/Multijoueur Classique/i).closest('a');
     expect(gameLink).toHaveAttribute('href', '/game');
   });
 
-  test('a un lien vers /about', () => {
+  test('a un lien vers /analysis', () => {
     render(<App />);
     
     const aboutLink = screen.getByText(/À propos/i).closest('a');
