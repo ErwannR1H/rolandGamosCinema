@@ -138,43 +138,8 @@ async function getActorImage(entityId) {
 }
 
 /**
- * Récupère l'affiche d'un film depuis Wikidata
- * @param {string} movieId - ID du film Wikidata (ex: Q123)
- * @returns {Promise<string|null>}
- */
-async function getMoviePoster(movieId) {
-    const query = `
-        SELECT ?poster WHERE {
-            wd:${movieId} wdt:P18 ?poster .
-        }
-        LIMIT 1
-    `;
-
-    try {
-        const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
-            query: query,
-            format: 'json'
-        });
-
-        const response = await fetch(url);
-        if (!response.ok) {
-            return null;
-        }
-
-        const data = await response.json();
-        if (data.results.bindings.length > 0) {
-            return data.results.bindings[0].poster.value;
-        }
-        return null;
-    } catch (error) {
-        console.error('Erreur récupération affiche film:', error);
-        return null;
-    }
-}
-
-/**
  * Vérifie si deux acteurs ont joué dans un film commun sur Wikidata
- * Méthode robuste : récupère tous les films de chaque acteur et trouve l'intersection
+ * Utilise une seule requête SPARQL optimisée
  * @param {string} actor1Uri - URI du premier acteur
  * @param {string} actor2Uri - URI du second acteur
  * @returns {Promise<Object|null>}
@@ -187,88 +152,28 @@ export async function findCommonMovieOnWikidata(actor1Uri, actor2Uri) {
         
         console.log(`🎬 Recherche de films communs entre ${actor1Id} et ${actor2Id}`);
         
-        // Étape 1: Récupérer tous les films de l'acteur 1
-        const actor1Movies = await getActorMovies(actor1Id);
-        console.log(`📽️ Acteur 1 a ${actor1Movies.length} films`);
-        
-        if (actor1Movies.length === 0) {
-            return null;
-        }
-        
-        // Étape 2: Récupérer tous les films de l'acteur 2
-        const actor2Movies = await getActorMovies(actor2Id);
-        console.log(`📽️ Acteur 2 a ${actor2Movies.length} films`);
-        
-        if (actor2Movies.length === 0) {
-            return null;
-        }
-        
-        // Étape 3: Trouver l'intersection (films communs)
-        const commonMovies = actor1Movies.filter(movie1 => 
-            actor2Movies.some(movie2 => movie2.movie === movie1.movie)
-        );
-        
-        console.log(`✨ ${commonMovies.length} film(s) commun(s) trouvé(s)`);
-        
-        if (commonMovies.length > 0) {
-            console.log(`🎬 Films communs:`, commonMovies.map(m => m.movieLabel));
-        }
-        
-        if (commonMovies.length === 0) {
-            return null;
-        }
-
-        // Récupérer l'affiche du premier film commun
-        const firstMovie = commonMovies[0];
-        const movieId = firstMovie.movie.split('/').pop();
-        const posterUrl = await getMoviePoster(movieId);
-
-        return {
-            movie: firstMovie.movie,
-            movieLabel: firstMovie.movieLabel,
-            moviePosterUrl: posterUrl,
-            source: 'Wikidata'
-        };
-    } catch (error) {
-        console.error('Erreur vérification films communs Wikidata:', error);
-        throw error;
-    }
-}
-
-/**
- * Récupère tous les films d'un acteur sur Wikidata
- * @param {string} actorId - ID Wikidata de l'acteur (ex: Q123)
- * @returns {Promise<Array>} - Liste des films avec leur label
- */
-async function getActorMovies(actorId) {
-    const query = `
-        SELECT DISTINCT ?movie ?movieLabel WHERE {
-            {
-                # Films où l'acteur est dans le cast (P161)
-                ?movie wdt:P161 wd:${actorId} .
-            } UNION {
-                # Films où l'acteur est le réalisateur (P57) - parfois ils jouent aussi
-                wd:${actorId} wdt:P800 ?movie .
-                ?movie wdt:P31/wdt:P279* wd:Q11424 .
-            } UNION {
-                # Recherche inverse - l'acteur a participé à (P1344)
-                wd:${actorId} wdt:P1344 ?movie .
-                ?movie wdt:P31/wdt:P279* wd:Q11424 .
+        // Requête SPARQL optimisée pour trouver les films communs en une seule fois
+        const query = `
+            SELECT DISTINCT ?movie ?movieLabel ?poster WHERE {
+                # Le film doit avoir les deux acteurs dans son casting
+                ?movie wdt:P161 wd:${actor1Id} .
+                ?movie wdt:P161 wd:${actor2Id} .
+                
+                # C'est un film ou une série TV
+                {
+                    ?movie wdt:P31/wdt:P279* wd:Q11424 .  # film
+                } UNION {
+                    ?movie wdt:P31/wdt:P279* wd:Q5398426 .  # série TV
+                }
+                
+                # Récupérer l'affiche si disponible
+                OPTIONAL { ?movie wdt:P18 ?poster . }
+                
+                SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
             }
-            
-            # Vérifier que c'est bien un film ou une série
-            {
-                ?movie wdt:P31/wdt:P279* wd:Q11424 .  # film
-            } UNION {
-                ?movie wdt:P31/wdt:P279* wd:Q5398426 .  # série TV
-            }
-            
-            SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
-        }
-        LIMIT 500
-    `;
+            LIMIT 10
+        `;
 
-    try {
         const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
             query: query,
             format: 'json'
@@ -276,21 +181,31 @@ async function getActorMovies(actorId) {
 
         const response = await fetch(url);
         if (!response.ok) {
-            console.warn(`Erreur récupération films pour ${actorId}: ${response.status}`);
-            return [];
+            console.warn(`Erreur SPARQL: ${response.status}`);
+            return null;
         }
 
         const data = await response.json();
-        const movies = data.results.bindings.map(binding => ({
-            movie: binding.movie.value,
-            movieLabel: binding.movieLabel.value
-        }));
+        const results = data.results.bindings;
+
+        if (results.length === 0) {
+            console.log(`❌ Aucun film commun trouvé`);
+            return null;
+        }
+
+        console.log(`✨ ${results.length} film(s) commun(s) trouvé(s)`);
+        console.log(`🎬 Films communs:`, results.map(r => r.movieLabel.value));
+
+        const firstResult = results[0];
         
-        console.log(`📋 Films trouvés pour ${actorId}:`, movies.slice(0, 5).map(m => m.movieLabel));
-        
-        return movies;
+        return {
+            movie: firstResult.movie.value,
+            movieLabel: firstResult.movieLabel.value,
+            moviePosterUrl: firstResult.poster ? firstResult.poster.value : null,
+            source: 'Wikidata'
+        };
     } catch (error) {
-        console.error(`Erreur récupération films pour ${actorId}:`, error);
-        return [];
+        console.error('Erreur vérification films communs Wikidata:', error);
+        throw error;
     }
 }
