@@ -6,6 +6,8 @@ import MessageContainer from './components/MessageContainer';
 import ActorsHistory from './components/ActorsHistory';
 import Loading from './components/Loading';
 import RulesModal from './components/RulesModal';
+import ChallengeSetup from './components/ChallengeSetup';
+import ChallengeGame from './components/ChallengeGame';
 import { findActor, haveCommonMovie } from './services/sparqlService';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
@@ -50,7 +52,7 @@ function Accueil() {
           borderBottom: '3px solid #667eea'
         }}>
           <h1 style={{ color: '#333', fontSize: '2.5em', marginBottom: '10px' }}>
-            Bienvenue sur notre plateforme d'analyse cinématographique
+            🎬 Bienvenue sur notre plateforme d'analyse cinématographique
           </h1>
           <p style={{ color: '#666', fontSize: '1.1em' }}>
             Enrichir & Tester ses connaissances cinématographiques
@@ -65,14 +67,82 @@ function Accueil() {
             marginBottom: '30px'
           }}>
             <h2 style={{ color: '#333', fontSize: '1.5em', marginBottom: '15px' }}>
-              À propos de l'application
+              Choisissez votre mode de jeu
             </h2>
             <p style={{ color: '#666', fontSize: '1.1em', lineHeight: '1.6' }}>
-              Testez votre culture cinématographique avec notre jeu des acteurs !
-              Défiez vos amis en trouvant des acteurs ayant joué ensemble dans un même film.
-              L'application utilise les technologies du <strong>Web Sémantique</strong> (Wikidata & SPARQL)
-              pour vérifier en temps réel les liens entre acteurs et films.
+              Deux modes disponibles pour tester vos connaissances cinématographiques
             </p>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '20px',
+            marginBottom: '30px'
+          }}>
+            <Link 
+              to="/classique" 
+              style={{
+                background: 'white',
+                padding: '25px',
+                borderRadius: '15px',
+                border: '2px solid #667eea',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                textAlign: 'center',
+                textDecoration: 'none',
+                color: 'inherit',
+                display: 'block'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-5px)';
+                e.currentTarget.style.boxShadow = '0 8px 30px rgba(102, 126, 234, 0.3)';
+                e.currentTarget.style.borderColor = '#5568d3';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.borderColor = '#667eea';
+              }}
+            >
+              <div style={{ fontSize: '3em', marginBottom: '10px' }}>🎮</div>
+              <h3 style={{ color: '#667eea', marginBottom: '10px', fontSize: '1.3em' }}>Mode Classique</h3>
+              <p style={{ color: '#666', lineHeight: '1.6', fontSize: '0.95em' }}>
+                Deux joueurs s'affrontent pour trouver des acteurs ayant joué ensemble
+              </p>
+            </Link>
+
+            <Link 
+              to="/defi" 
+              style={{
+                background: 'white',
+                padding: '25px',
+                borderRadius: '15px',
+                border: '2px solid #f5576c',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                textAlign: 'center',
+                textDecoration: 'none',
+                color: 'inherit',
+                display: 'block'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-5px)';
+                e.currentTarget.style.boxShadow = '0 8px 30px rgba(245, 87, 108, 0.3)';
+                e.currentTarget.style.borderColor = '#e4465b';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.borderColor = '#f5576c';
+              }}
+            >
+              <div style={{ fontSize: '3em', marginBottom: '10px' }}>🎯</div>
+              <h3 style={{ color: '#f5576c', marginBottom: '10px', fontSize: '1.3em' }}>Mode Défi</h3>
+              <p style={{ color: '#666', lineHeight: '1.6', fontSize: '0.95em' }}>
+                Trouvez le chemin le plus court entre deux acteurs
+              </p>
+            </Link>
           </div>
 
           <div style={{
@@ -80,15 +150,9 @@ function Accueil() {
             gap: '15px',
             flexDirection: 'column'
           }}>
-            <Link to="/game" style={{ textDecoration: 'none' }}>
-              <button style={{ ...buttonStyle, width: '100%' }}>
-                Tester maintenant ses connaissances, seul ou à plusieurs !
-              </button>
-            </Link>
-
             <Link to="/about" style={{ textDecoration: 'none' }}>
-              <button style={{
-                ...buttonStyle,
+              <button style={{ 
+                ...buttonStyle, 
                 width: '100%',
                 background: '#6c757d'
               }}>
@@ -120,7 +184,6 @@ function Game() {
     lastActor: null,
     isGameActive: false
   });
-  const [playerCount, setPlayerCount] = useState(2); // default 2 joueurs
 
   const [actorInput, setActorInput] = useState('');
   const [messages, setMessages] = useState([]);
@@ -135,27 +198,18 @@ function Game() {
     setMessages([]);
   };
 
-  const startNewGameWithCount = (count) => {
-    const scores = {};
-    for (let i = 1; i <= count; i++) {
-      scores[`player${i}`] = 0;
-    }
-
-    setPlayerCount(count);
+  const startNewGame = () => {
     setGameState({
       currentPlayer: 1,
-      scores,
+      scores: { player1: 0, player2: 0 },
       actorsHistory: [],
       lastActor: null,
-      isGameActive: true,
-      playerCount: count
+      isGameActive: true
     });
     setActorInput('');
     clearMessages();
     addMessage('Nouvelle partie commencée ! Joueur 1, entrez le nom d\'un acteur.', 'info');
   };
-
-  const startNewGame = () => startNewGameWithCount(playerCount);
 
   const endGame = (winner) => {
     setGameState(prev => ({ ...prev, isGameActive: false }));
@@ -168,15 +222,12 @@ function Game() {
       const scoreKey = `player${prev.currentPlayer}`;
       newScores[scoreKey]++;
 
-      const pc = prev.playerCount || playerCount || 2;
-      const nextPlayer = prev.currentPlayer === pc ? 1 : prev.currentPlayer + 1;
-
       return {
         ...prev,
         lastActor: actor,
         actorsHistory: [...prev.actorsHistory, { ...actor, player: prev.currentPlayer }],
         scores: newScores,
-        currentPlayer: nextPlayer
+        currentPlayer: prev.currentPlayer === 1 ? 2 : 1
       };
     });
     setActorInput('');
@@ -198,9 +249,7 @@ function Game() {
     // Vérifier si l'acteur a déjà été mentionné
     if (gameState.actorsHistory.some(a => a.label.toLowerCase() === actorName.toLowerCase())) {
       addMessage('Cet acteur a déjà été mentionné ! Le Joueur ' + gameState.currentPlayer + ' perd.', 'error');
-      const pc = gameState.playerCount || playerCount || 2;
-      const winnerDup = gameState.currentPlayer === pc ? 1 : gameState.currentPlayer + 1;
-      endGame(winnerDup);
+      endGame(gameState.currentPlayer === 1 ? 2 : 1);
       return;
     }
 
@@ -232,9 +281,7 @@ function Game() {
           `Aucun film commun trouvé entre ${gameState.lastActor.label} et ${actor.label}. Le Joueur ${gameState.currentPlayer} perd.`,
           'error'
         );
-        const pc2 = gameState.playerCount || playerCount || 2;
-        const winnerNoCommon = gameState.currentPlayer === pc2 ? 1 : gameState.currentPlayer + 1;
-        endGame(winnerNoCommon);
+        endGame(gameState.currentPlayer === 1 ? 2 : 1);
         setIsLoading(false);
         return;
       }
@@ -259,15 +306,15 @@ function Game() {
       addMessage('Aucune partie en cours.', 'error');
       return;
     }
-    const pc = gameState.playerCount || playerCount || 2;
-    const winner = gameState.currentPlayer === pc ? 1 : gameState.currentPlayer + 1;
+
+    const winner = gameState.currentPlayer === 1 ? 2 : 1;
     addMessage(`Le Joueur ${gameState.currentPlayer} abandonne. Le Joueur ${winner} gagne !`, 'info');
     endGame(winner);
   };
 
   const buttonStyle = (isPrimary) => {
     const baseColor = gameState.currentPlayer === 1 ? '#667eea' : '#f5576c';
-
+    
     return {
       flex: 1,
       padding: '15px 25px',
@@ -315,6 +362,22 @@ function Game() {
         boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
         padding: '30px'
       }}>
+        <div style={{ marginBottom: '20px' }}>
+          <Link to="/" style={{ textDecoration: 'none' }}>
+            <button style={{
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '8px',
+              background: '#6c757d',
+              color: 'white',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}>
+              ← Retour à l'accueil
+            </button>
+          </Link>
+        </div>
+
         <header style={{
           textAlign: 'center',
           marginBottom: '30px',
@@ -333,7 +396,7 @@ function Game() {
         <main>
           {gameState.isGameActive && (
             <>
-              <GameStatus
+              <GameStatus 
                 currentPlayer={gameState.currentPlayer}
                 scores={gameState.scores}
                 isGameActive={gameState.isGameActive}
@@ -341,7 +404,7 @@ function Game() {
 
               <LastActor lastActor={gameState.lastActor} />
 
-              <ActorInput
+              <ActorInput 
                 value={actorInput}
                 onChange={setActorInput}
                 onSubmit={handleSubmit}
@@ -365,17 +428,8 @@ function Game() {
               color: '#666'
             }}>
               <p style={{ fontSize: '1.2em', marginBottom: '20px' }}>
-                Choisissez le nombre de joueurs puis cliquez sur "Nouvelle Partie".
+                Cliquez sur "Nouvelle Partie" pour commencer à jouer !
               </p>
-
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
-                <label style={{ alignSelf: 'center' }}>Joueurs :</label>
-                <select value={playerCount} onChange={(e) => setPlayerCount(Number(e.target.value))} style={{ padding: '10px', borderRadius: '8px' }}>
-                  {[1,2,3,4,5].map(n => (
-                    <option key={n} value={n}>{n}</option>
-                  ))}
-                </select>
-              </div>
               <MessageContainer messages={messages} />
             </div>
           )}
@@ -388,9 +442,6 @@ function Game() {
           paddingTop: '20px',
           borderTop: '2px solid #eee'
         }}>
-          <button onClick={() => startNewGameWithCount(1)} style={{ ...buttonStyle(true), background: '#34c759' }}>
-            Mode Solo
-          </button>
           <button onClick={startNewGame} style={buttonStyle(true)}>
             Nouvelle Partie
           </button>
@@ -399,7 +450,7 @@ function Game() {
           </button>
         </div>
 
-        <RulesModal
+        <RulesModal 
           isOpen={isRulesOpen}
           onClose={() => setIsRulesOpen(false)}
         />
@@ -408,16 +459,34 @@ function Game() {
   );
 }
 
+// Composant pour gérer le mode défi
+function ChallengeMode() {
+  const [config, setConfig] = useState(null);
+
+  const handleStartChallenge = (challengeConfig) => {
+    setConfig(challengeConfig);
+  };
+
+  if (!config) {
+    return <ChallengeSetup onStartChallenge={handleStartChallenge} />;
+  }
+
+  return <ChallengeGame config={config} />;
+}
+
 // 3. Le composant principal qui gère la navigation
 function App() {
   return (
     <Router>
       <Routes>
-        {/* La route racine "/" affiche l'accueil */}
+        {/* La route racine "/" affiche l'accueil avec les modes de jeu */}
         <Route path="/" element={<Accueil />} />
-
-        {/* La route "/dashboard" affiche votre contenu actuel */}
-        <Route path="/game" element={<Game />} />
+        
+        {/* Mode classique (2 joueurs) */}
+        <Route path="/classique" element={<Game />} />
+        
+        {/* Mode défi (solo) */}
+        <Route path="/defi" element={<ChallengeMode />} />
       </Routes>
     </Router>
   );
