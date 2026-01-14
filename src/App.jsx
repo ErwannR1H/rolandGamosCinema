@@ -65,10 +65,13 @@ function Accueil() {
             marginBottom: '30px'
           }}>
             <h2 style={{ color: '#333', fontSize: '1.5em', marginBottom: '15px' }}>
-              À propos de l'application 
+              À propos de l'application
             </h2>
             <p style={{ color: '#666', fontSize: '1.1em', lineHeight: '1.6' }}>
-              TODO Description
+              Testez votre culture cinématographique avec notre jeu des acteurs !
+              Défiez vos amis en trouvant des acteurs ayant joué ensemble dans un même film.
+              L'application utilise les technologies du <strong>Web Sémantique</strong> (Wikidata & SPARQL)
+              pour vérifier en temps réel les liens entre acteurs et films.
             </p>
           </div>
 
@@ -82,10 +85,10 @@ function Accueil() {
                 Tester maintenant ses connaissances, seul ou à plusieurs !
               </button>
             </Link>
-            
+
             <Link to="/about" style={{ textDecoration: 'none' }}>
-              <button style={{ 
-                ...buttonStyle, 
+              <button style={{
+                ...buttonStyle,
                 width: '100%',
                 background: '#6c757d'
               }}>
@@ -247,7 +250,7 @@ function Game() {
 
   const buttonStyle = (isPrimary) => {
     const baseColor = gameState.currentPlayer === 1 ? '#667eea' : '#f5576c';
-    
+
     return {
       flex: 1,
       padding: '15px 25px',
@@ -313,7 +316,7 @@ function Game() {
         <main>
           {gameState.isGameActive && (
             <>
-              <GameStatus 
+              <GameStatus
                 currentPlayer={gameState.currentPlayer}
                 scores={gameState.scores}
                 isGameActive={gameState.isGameActive}
@@ -321,7 +324,7 @@ function Game() {
 
               <LastActor lastActor={gameState.lastActor} />
 
-              <ActorInput 
+              <ActorInput
                 value={actorInput}
                 onChange={setActorInput}
                 onSubmit={handleSubmit}
@@ -367,7 +370,7 @@ function Game() {
           </button>
         </div>
 
-        <RulesModal 
+        <RulesModal
           isOpen={isRulesOpen}
           onClose={() => setIsRulesOpen(false)}
         />
@@ -383,7 +386,7 @@ function App() {
       <Routes>
         {/* La route racine "/" affiche l'accueil */}
         <Route path="/" element={<Accueil />} />
-        
+
         {/* La route "/dashboard" affiche votre contenu actuel */}
         <Route path="/game" element={<Game />} />
       </Routes>
