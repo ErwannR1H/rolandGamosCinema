@@ -12,40 +12,40 @@ import { findActorOnWikidata, findCommonMovieOnWikidata } from './wikidataServic
  * @returns {Promise<Object|null>} - Objet contenant l'URI et le label de l'acteur, ou null
  */
 export async function findActor(actorName) {
-    console.log(`🔍 Recherche de: "${actorName}"`);
+    console.log(`Recherche de: "${actorName}"`);
     
     // Étape 1 : Recherche directe sur Wikidata
     const directResult = await searchActor(actorName);
     if (directResult) {
-        console.log(`✅ Trouvé directement sur Wikidata!`);
+        console.log(`Trouvé directement sur Wikidata!`);
         return directResult;
     }
     
     // Étape 2 : Si échec, utiliser l'IA pour corriger le nom
-    console.log(`❌ Pas trouvé directement, utilisation de l'IA...`);
+    console.log(`Pas trouvé directement, utilisation de l'IA...`);
     
     try {
         const improvedName = await improveActorNameForDBpedia(actorName);
         
-        console.log(`🤖 IA suggère: "${improvedName}"`);
+        console.log(`IA suggère: "${improvedName}"`);
         
         // Si l'IA retourne le même nom ou un nom vide, pas la peine de réessayer
         if (!improvedName || improvedName.toLowerCase().trim() === actorName.toLowerCase().trim()) {
-            console.log(`ℹ️ L'IA n'a pas changé le nom de manière significative`);
+            console.log(`L'IA n'a pas changé le nom de manière significative`);
             return null;
         }
         
         // Étape 3 : Réessayer avec le nom amélioré
         const aiResult = await searchActor(improvedName);
         if (aiResult) {
-            console.log(`✅ Trouvé avec le nom corrigé par l'IA sur Wikidata!`);
+            console.log(`Trouvé avec le nom corrigé par l'IA sur Wikidata!`);
             return aiResult;
         }
     } catch (error) {
-        console.error(`❌ Erreur avec l'IA:`, error);
+        console.error(`Erreur avec l'IA:`, error);
     }
     
-    console.log(`❌ Acteur non trouvé même après correction IA`);
+    console.log(`Acteur non trouvé même après correction IA`);
     return null;
 }
 
@@ -76,7 +76,7 @@ export async function haveCommonMovie(actor1Uri, actor2Uri) {
         const result = await findCommonMovieOnWikidata(actor1Uri, actor2Uri);
         
         if (result) {
-            console.log(`✅ Film commun trouvé sur Wikidata: ${result.movieLabel}`);
+            console.log(`Film commun trouvé sur Wikidata: ${result.movieLabel}`);
         }
         
         return result;

@@ -14,7 +14,7 @@ function Loading({ isLoading }) {
         animation: 'spin 1s linear infinite',
         margin: '0 auto 15px'
       }} />
-      <p>Vérification avec WikiData...</p>
+      <p>Vérification avec Wikidata...</p>
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }

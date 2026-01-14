@@ -40,10 +40,10 @@ export async function improveActorNameForDBpedia(actorName) {
 
         const data = await response.json();
         const improvedName = data.choices[0].message.content.trim();
-        console.log(`🤖 IA: "${actorName}" → "${improvedName}"`);
+        console.log(`IA: "${actorName}" → "${improvedName}"`);
         return improvedName;
     } catch (error) {
-        console.error('❌ Erreur IA:', error);
+        console.error('Erreur IA:', error);
         return actorName; // Retourne le nom original en cas d'erreur
     }
 }
