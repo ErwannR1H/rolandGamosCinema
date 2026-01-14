@@ -12,6 +12,7 @@ export default {
   ],
   collectCoverageFrom: [
     'src/components/**/*.{js,jsx}',
+    'src/services/**/*.js',
     '!src/**/__tests__/**',
     '!src/**/*.test.{js,jsx}'
   ]
