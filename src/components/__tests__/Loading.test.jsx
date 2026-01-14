@@ -11,7 +11,7 @@ describe('Loading', () => {
   test('affiche le message de chargement quand isLoading est true', () => {
     render(<Loading isLoading={true} />);
     
-    expect(screen.getByText('Vérification avec DBpedia...')).toBeInTheDocument();
+    expect(screen.getByText('Vérification avec WikiData...')).toBeInTheDocument();
   });
 
   test('affiche le spinner de chargement', () => {
