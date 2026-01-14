@@ -18,14 +18,8 @@ describe('App', () => {
     render(<App />);
     
     expect(screen.getByText(/multijoueur/i)).toBeInTheDocument();
-    expect(screen.getByText(/solo/i)).toBeInTheDocument();
-    expect(screen.getByText(/Vers analyse de data/i)).toBeInTheDocument();
-  });
-
-  test('affiche la description sur la page d\'accueil', () => {
-    render(<App />);
-    
-    expect(screen.getByText(/À propos de l'application/i)).toBeInTheDocument();
+    expect(screen.getByText(/Mode Solo - Défiez l'IA/i)).toBeInTheDocument();
+    expect(screen.getByText(/Analyse du réseau d'acteurs/i)).toBeInTheDocument();
   });
 
   test('a un lien vers /game', () => {
@@ -42,10 +36,10 @@ describe('App', () => {
     expect(soloLink).toHaveAttribute('href', '/solo');
   });
 
-  test('a un lien vers /about', () => {
+  test('a un lien vers /analysis', () => {
     render(<App />);
     
-    const aboutLink = screen.getByText(/Vers analyse de data/i).closest('a');
-    expect(aboutLink).toHaveAttribute('href', '/about');
+    const analysisLink = screen.getByText(/Analyse du réseau d'acteurs/i).closest('a');
+    expect(analysisLink).toHaveAttribute('href', '/analysis');
   });
 });

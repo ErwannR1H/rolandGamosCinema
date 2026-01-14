@@ -127,6 +127,7 @@ describe('wikidataService', () => {
 
             expect(result).toEqual({
                 movie: 'http://www.wikidata.org/entity/Q456',
+                title: 'Forrest Gump',
                 movieLabel: 'Forrest Gump',
                 moviePosterUrl: 'https://example.com/poster.jpg',
                 source: 'Wikidata'
