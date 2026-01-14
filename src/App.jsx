@@ -253,6 +253,7 @@ function Accueil() {
 }
 
 function Game() {
+  const [playerCount, setPlayerCount] = useState(2);
   const [gameState, setGameState] = useState({
     currentPlayer: 1,
     scores: { player1: 0, player2: 0 },
@@ -275,9 +276,15 @@ function Game() {
   };
 
   const startNewGame = () => {
+    // Initialiser les scores pour le nombre de joueurs sélectionné
+    const initialScores = {};
+    for (let i = 1; i <= playerCount; i++) {
+      initialScores[`player${i}`] = 0;
+    }
+
     setGameState({
       currentPlayer: 1,
-      scores: { player1: 0, player2: 0 },
+      scores: initialScores,
       actorsHistory: [],
       lastActor: null,
       isGameActive: true
@@ -298,12 +305,15 @@ function Game() {
       const scoreKey = `player${prev.currentPlayer}`;
       newScores[scoreKey]++;
 
+      // Calculer le prochain joueur (avec rotation)
+      const nextPlayer = prev.currentPlayer >= playerCount ? 1 : prev.currentPlayer + 1;
+
       return {
         ...prev,
         lastActor: actor,
         actorsHistory: [...prev.actorsHistory, { ...actor, player: prev.currentPlayer }],
         scores: newScores,
-        currentPlayer: prev.currentPlayer === 1 ? 2 : 1
+        currentPlayer: nextPlayer
       };
     });
     setActorInput('');
@@ -325,7 +335,18 @@ function Game() {
     // Vérifier si l'acteur a déjà été mentionné
     if (gameState.actorsHistory.some(a => a.label.toLowerCase() === actorName.toLowerCase())) {
       addMessage('Cet acteur a déjà été mentionné ! Le Joueur ' + gameState.currentPlayer + ' perd.', 'error');
-      endGame(gameState.currentPlayer === 1 ? 2 : 1);
+      
+      // Déterminer le gagnant (tous les autres joueurs sauf celui qui a perdu)
+      const winners = [];
+      for (let i = 1; i <= playerCount; i++) {
+        if (i !== gameState.currentPlayer) {
+          winners.push(i);
+        }
+      }
+      const winnerText = winners.length > 1 
+        ? `Les Joueurs ${winners.join(', ')} gagnent` 
+        : `Le Joueur ${winners[0]} gagne`;
+      endGame(winnerText);
       return;
     }
 
@@ -357,7 +378,18 @@ function Game() {
           `Aucun film commun trouvé entre ${gameState.lastActor.label} et ${actor.label}. Le Joueur ${gameState.currentPlayer} perd.`,
           'error'
         );
-        endGame(gameState.currentPlayer === 1 ? 2 : 1);
+        
+        // Déterminer le gagnant (tous les autres joueurs sauf celui qui a perdu)
+        const winners = [];
+        for (let i = 1; i <= playerCount; i++) {
+          if (i !== gameState.currentPlayer) {
+            winners.push(i);
+          }
+        }
+        const winnerText = winners.length > 1 
+          ? `Les Joueurs ${winners.join(', ')} gagnent` 
+          : `Le Joueur ${winners[0]} gagne`;
+        endGame(winnerText);
         setIsLoading(false);
         return;
       }
@@ -383,9 +415,19 @@ function Game() {
       return;
     }
 
-    const winner = gameState.currentPlayer === 1 ? 2 : 1;
-    addMessage(`Le Joueur ${gameState.currentPlayer} abandonne. Le Joueur ${winner} gagne !`, 'info');
-    endGame(winner);
+    // Déterminer le gagnant (tous les autres joueurs sauf celui qui abandonne)
+    const winners = [];
+    for (let i = 1; i <= playerCount; i++) {
+      if (i !== gameState.currentPlayer) {
+        winners.push(i);
+      }
+    }
+    const winnerText = winners.length > 1 
+      ? `Les Joueurs ${winners.join(', ')} gagnent` 
+      : `Le Joueur ${winners[0]} gagne`;
+    
+    addMessage(`Le Joueur ${gameState.currentPlayer} abandonne. ${winnerText} !`, 'info');
+    endGame(winnerText);
   };
 
   const buttonStyle = (isPrimary) => {
@@ -506,13 +548,42 @@ function Game() {
               <p style={{ fontSize: '1.2em', marginBottom: '20px' }}>
                 Cliquez sur "Nouvelle Partie" pour commencer à jouer !
               </p>
-              <MessageContainer messages={messages} />
-
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '10px' }}>
-                <Link to="/" style={{ textDecoration: 'none' }}>
-                  <button style={{ ...buttonStyle(false) }}>Retour à l'accueil</button>
-                </Link>
+              
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                gap: '15px', 
+                marginBottom: '20px',
+                background: '#f8f9fa',
+                padding: '20px',
+                borderRadius: '10px',
+                maxWidth: '300px',
+                margin: '0 auto 20px'
+              }}>
+                <label style={{ fontSize: '1.1em', fontWeight: '600', color: '#333' }}>
+                  Nombre de joueurs :
+                </label>
+                <select 
+                  value={playerCount} 
+                  onChange={(e) => setPlayerCount(Number(e.target.value))} 
+                  style={{ 
+                    padding: '10px 15px', 
+                    borderRadius: '8px',
+                    border: '2px solid #667eea',
+                    fontSize: '1em',
+                    cursor: 'pointer',
+                    minWidth: '100px',
+                    background: 'white'
+                  }}
+                >
+                  {[2, 3, 4, 5].map(n => (
+                    <option key={n} value={n}>{n} joueurs</option>
+                  ))}
+                </select>
               </div>
+              
+              <MessageContainer messages={messages} />
             </div>
           )}
         </main>

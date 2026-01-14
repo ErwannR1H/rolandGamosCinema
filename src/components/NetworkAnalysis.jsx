@@ -1,4 +1,5 @@
 import React, { useState, Suspense, lazy } from 'react';
+import { Link } from 'react-router-dom';
 import GraphManager from './GraphManager';
 import { findHubActors, findBridgeActors, extractSubgraph } from '../services/graphAnalysisService';
 
@@ -51,6 +52,22 @@ function NetworkAnalysis() {
 
             }}
             >
+            <div style={{ marginBottom: '20px' }}>
+              <Link to="/" style={{ textDecoration: 'none' }}>
+                <button style={{
+                  padding: '10px 20px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  background: '#6c757d',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}>
+                  ← Retour à l'accueil
+                </button>
+              </Link>
+            </div>
+            
             <h1> 🕸️ Analyse du Réseau d'Acteurs</h1>
             <p>Téléchargez un graphe d'acteurs depuis Wikidata pour analyser les connexions et visualiser le réseau.</p>
             
