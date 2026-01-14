@@ -382,12 +382,18 @@ function Game() {
               <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
                 <label style={{ alignSelf: 'center' }}>Joueurs :</label>
                 <select value={playerCount} onChange={(e) => setPlayerCount(Number(e.target.value))} style={{ padding: '10px', borderRadius: '8px' }}>
-                  {[2,3,4,5].map(n => (
+                  {[1,2,3,4,5].map(n => (
                     <option key={n} value={n}>{n}</option>
                   ))}
                 </select>
               </div>
               <MessageContainer messages={messages} />
+
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '10px' }}>
+                <Link to="/" style={{ textDecoration: 'none' }}>
+                  <button style={{ ...buttonStyle(false) }}>Retour à l'accueil</button>
+                </Link>
+              </div>
             </div>
           )}
         </main>
@@ -399,15 +405,15 @@ function Game() {
           paddingTop: '20px',
           borderTop: '2px solid #eee'
         }}>
-          {/* Masquer Mode Solo pendant le choix du nombre de joueurs (sélecteur visible quand !isGameActive) */}
-          {gameState.isGameActive && ((gameState.playerCount || playerCount) === 1) && (
-            <button onClick={() => startNewGameWithCount(1)} style={{ ...buttonStyle(true), background: '#34c759' }}>
-              Mode Solo
-            </button>
-          )}
+         
           <button onClick={startNewGame} style={buttonStyle(true)}>
             Nouvelle Partie
           </button>
+          {gameState.isGameActive && ((gameState.playerCount || playerCount) > 1) && (
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <button style={{ ...buttonStyle(false) }}>Retour à l'accueil</button>
+            </Link>
+          )}
           <button onClick={() => setIsRulesOpen(true)} style={buttonStyle(false)}>
             Règles
           </button>
