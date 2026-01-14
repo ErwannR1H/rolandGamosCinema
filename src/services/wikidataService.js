@@ -150,7 +150,7 @@ export async function findCommonMovieOnWikidata(actor1Uri, actor2Uri) {
         const actor1Id = actor1Uri.split('/').pop();
         const actor2Id = actor2Uri.split('/').pop();
         
-        console.log(`🎬 Recherche de films communs entre ${actor1Id} et ${actor2Id}`);
+        console.log(`Recherche de films communs entre ${actor1Id} et ${actor2Id}`);
         
         // Requête SPARQL optimisée pour trouver les films communs en une seule fois
         const query = `
@@ -189,12 +189,12 @@ export async function findCommonMovieOnWikidata(actor1Uri, actor2Uri) {
         const results = data.results.bindings;
 
         if (results.length === 0) {
-            console.log(`❌ Aucun film commun trouvé`);
+            console.log(`Aucun film commun trouvé`);
             return null;
         }
 
-        console.log(`✨ ${results.length} film(s) commun(s) trouvé(s)`);
-        console.log(`🎬 Films communs:`, results.map(r => r.movieLabel.value));
+        console.log(`${results.length} film(s) commun(s) trouvé(s)`);
+        console.log(`Films communs:`, results.map(r => r.movieLabel.value));
 
         const firstResult = results[0];
         
