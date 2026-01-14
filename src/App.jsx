@@ -6,6 +6,7 @@ import MessageContainer from './components/MessageContainer';
 import ActorsHistory from './components/ActorsHistory';
 import Loading from './components/Loading';
 import RulesModal from './components/RulesModal';
+import SoloGame from './components/SoloGame';
 import { findActor, haveCommonMovie } from './services/sparqlService';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
@@ -82,7 +83,17 @@ function Accueil() {
           }}>
             <Link to="/game" style={{ textDecoration: 'none' }}>
               <button style={{ ...buttonStyle, width: '100%' }}>
-                Tester maintenant ses connaissances, seul ou à plusieurs !
+                👥 Mode Multijoueur - Défiez vos amis !
+              </button>
+            </Link>
+
+            <Link to="/solo" style={{ textDecoration: 'none' }}>
+              <button style={{
+                ...buttonStyle,
+                width: '100%',
+                background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'
+              }}>
+                🤖 Mode Solo - Défiez l'IA !
               </button>
             </Link>
 
@@ -416,8 +427,11 @@ function App() {
         {/* La route racine "/" affiche l'accueil */}
         <Route path="/" element={<Accueil />} />
 
-        {/* La route "/dashboard" affiche votre contenu actuel */}
+        {/* La route "/game" affiche le mode multijoueur */}
         <Route path="/game" element={<Game />} />
+
+        {/* La route "/solo" affiche le mode solo contre l'IA */}
+        <Route path="/solo" element={<SoloGame />} />
       </Routes>
     </Router>
   );
