@@ -88,6 +88,12 @@ function Accueil() {
             <Link to="/analysis" style={{ textDecoration: 'none' }}>
               <button style={{ 
                 ...buttonStyle, 
+                width: '100%',
+                background: '#6c757d'
+              }}>
+                📊 Analyse du réseau d'acteurs
+              </button>
+            </Link>
 
             <Link to="/solo" style={{ textDecoration: 'none' }}>
               <button style={{
@@ -105,7 +111,7 @@ function Accueil() {
                 width: '100%',
                 background: '#6c757d'
               }}>
-                Analyse du réseau d'acteurs
+                À propos
               </button>
             </Link>
           </div>
