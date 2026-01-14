@@ -17,7 +17,8 @@ describe('App', () => {
   test('affiche les boutons de navigation sur l\'accueil', () => {
     render(<App />);
     
-    expect(screen.getByText(/Tester maintenant ses connaissances/i)).toBeInTheDocument();
+    expect(screen.getByText(/multijoueur/i)).toBeInTheDocument();
+    expect(screen.getByText(/solo/i)).toBeInTheDocument();
     expect(screen.getByText(/Vers analyse de data/i)).toBeInTheDocument();
   });
 
@@ -30,8 +31,15 @@ describe('App', () => {
   test('a un lien vers /game', () => {
     render(<App />);
     
-    const gameLink = screen.getByText(/Tester maintenant ses connaissances/i).closest('a');
+    const gameLink = screen.getByText(/multijoueur/i).closest('a');
     expect(gameLink).toHaveAttribute('href', '/game');
+  });
+
+  test('a un lien vers /solo', () => {
+    render(<App />);
+    
+    const soloLink = screen.getByText(/solo/i).closest('a');
+    expect(soloLink).toHaveAttribute('href', '/solo');
   });
 
   test('a un lien vers /about', () => {
