@@ -6,9 +6,8 @@ function ActorsHistory({ actors }) {
   }
 
   const getPlayerGradient = (player) => {
-    return player === 1
-      ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-      : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+    const colors = ['#667eea', '#f5576c', '#34c759', '#ffb400', '#6f42c1'];
+    return colors[(player - 1) % colors.length];
   };
 
   return (

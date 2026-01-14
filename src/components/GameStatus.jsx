@@ -1,8 +1,9 @@
 import React from 'react';
+function GameStatus({ currentPlayer, scores = {}, isGameActive }) {
+  const colors = ['#667eea', '#f5576c', '#34c759', '#ffb400', '#6f42c1'];
 
-function GameStatus({ currentPlayer, scores, isGameActive }) {
-  const playerColor = currentPlayer === 1 ? '#667eea' : '#f5576c';
-  
+  const playerLabel = isGameActive ? `Joueur ${currentPlayer}` : 'Partie terminée';
+
   return (
     <div style={{
       display: 'flex',
@@ -16,20 +17,23 @@ function GameStatus({ currentPlayer, scores, isGameActive }) {
       <div style={{
         fontSize: '1.3em',
         fontWeight: 'bold',
-        color: playerColor,
+        color: colors[(currentPlayer - 1) % colors.length],
         transition: 'color 0.5s ease'
       }}>
-        {isGameActive ? `Joueur ${currentPlayer}` : 'Partie terminée'}
+        {playerLabel}
       </div>
-      <div style={{ display: 'flex', gap: '30px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.9em', color: '#667eea', fontWeight: '600' }}>Joueur 1:</span>
-          <span style={{ fontSize: '1.5em', fontWeight: 'bold', color: '#667eea' }}>{scores.player1}</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.9em', color: '#f5576c', fontWeight: '600' }}>Joueur 2:</span>
-          <span style={{ fontSize: '1.5em', fontWeight: 'bold', color: '#f5576c' }}>{scores.player2}</span>
-        </div>
+
+      <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+        {Object.keys(scores).map((key, idx) => {
+          const playerNum = key.replace('player', '');
+          const color = colors[(Number(playerNum) - 1) % colors.length];
+          return (
+            <div key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.9em', color, fontWeight: '600' }}>{`Joueur ${playerNum}:`}</span>
+              <span style={{ fontSize: '1.5em', fontWeight: 'bold', color }}>{scores[key] ?? 0}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
