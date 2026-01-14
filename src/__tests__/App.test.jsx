@@ -17,27 +17,30 @@ describe('App', () => {
   test('affiche les boutons de navigation sur l\'accueil', () => {
     render(<App />);
     
-    expect(screen.getByText(/Tester maintenant ses connaissances/i)).toBeInTheDocument();
-    expect(screen.getByText(/Vers analyse de data/i)).toBeInTheDocument();
+    expect(screen.getByText(/Solo Classique/i)).toBeInTheDocument();
+    expect(screen.getByText(/Solo Défi/i)).toBeInTheDocument();
+    expect(screen.getByText(/Multijoueur Classique/i)).toBeInTheDocument();
+    expect(screen.getByText(/Analyse du Réseau/i)).toBeInTheDocument();
   });
 
   test('affiche la description sur la page d\'accueil', () => {
     render(<App />);
     
-    expect(screen.getByText(/À propos de l'application/i)).toBeInTheDocument();
+    expect(screen.getByText(/Choisissez votre mode de jeu/i)).toBeInTheDocument();
+    expect(screen.getByText(/À propos/i)).toBeInTheDocument();
   });
 
   test('a un lien vers /game', () => {
     render(<App />);
     
-    const gameLink = screen.getByText(/Tester maintenant ses connaissances/i).closest('a');
+    const gameLink = screen.getByText(/Multijoueur Classique/i).closest('a');
     expect(gameLink).toHaveAttribute('href', '/game');
   });
 
   test('a un lien vers /about', () => {
     render(<App />);
     
-    const aboutLink = screen.getByText(/Vers analyse de data/i).closest('a');
+    const aboutLink = screen.getByText(/À propos/i).closest('a');
     expect(aboutLink).toHaveAttribute('href', '/about');
   });
 });
