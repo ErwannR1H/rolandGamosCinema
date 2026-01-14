@@ -21,6 +21,7 @@ function SoloGame() {
     const [hints, setHints] = useState([]);
     const [hintsRemaining, setHintsRemaining] = useState(3);
     const [isLoadingHints, setIsLoadingHints] = useState(false);
+    const [gameOverReason, setGameOverReason] = useState('');
 
     useEffect(() => {
         setHighScore(getHighScore());
@@ -41,16 +42,19 @@ function SoloGame() {
         setActorInput('');
         setHints([]);
         setHintsRemaining(3);
+        setGameOverReason('');
         showMessage('🎬 C\'est parti ! Nommez un acteur pour commencer.', 'info');
     };
 
-    const endGame = (isVictory = false) => {
+    const endGame = (isVictory = false, reason = '') => {
         const finalScore = gameState.score;
         const isNewRecord = saveHighScore(finalScore);
 
         if (isNewRecord) {
             setHighScore(finalScore);
         }
+
+        setGameOverReason(reason);
 
         setGameState(prev => ({
             ...prev,
@@ -86,7 +90,7 @@ function SoloGame() {
         // Vérifier si l'acteur a déjà été mentionné
         if (gameState.actorsHistory.some(a => a.label.toLowerCase() === actorName.toLowerCase())) {
             showMessage('Cet acteur a déjà été mentionné ! Game Over.', 'error');
-            endGame();
+            endGame(false, `L'acteur "${actorName}" avait déjà été mentionné dans cette partie.`);
             return;
         }
 
@@ -105,7 +109,7 @@ function SoloGame() {
             // Vérifier si l'acteur a déjà été mentionné (par URI - plus fiable)
             if (gameState.actorsHistory.some(a => a.actor === actor.actor)) {
                 showMessage('Cet acteur a déjà été mentionné ! Game Over.', 'error');
-                endGame();
+                endGame(false, `L'acteur "${actor.label}" avait déjà été mentionné dans cette partie.`);
                 setIsLoading(false);
                 return;
             }
@@ -129,7 +133,7 @@ function SoloGame() {
                     `Aucun film commun trouvé entre ${gameState.lastActor.label} et ${actor.label}. Game Over !`,
                     'error'
                 );
-                endGame();
+                endGame(false, `Aucun film commun n'a été trouvé entre "${gameState.lastActor.label}" et "${actor.label}".`);
                 setIsLoading(false);
                 return;
             }
@@ -186,7 +190,7 @@ function SoloGame() {
 
     const handleGiveUp = () => {
         showMessage('Vous avez abandonné.', 'info');
-        endGame();
+        endGame(false, 'Vous avez abandonné la partie.');
     };
 
     const handleGetHint = async () => {
@@ -446,6 +450,18 @@ function SoloGame() {
                                 <h2 style={{ color: '#333' }}>
                                     {gameState.status === 'victory' ? 'Victoire !' : 'Game Over'}
                                 </h2>
+                                {gameOverReason && gameState.status === 'gameOver' && (
+                                    <p style={{
+                                        color: '#856404',
+                                        background: '#fff3cd',
+                                        padding: '15px',
+                                        borderRadius: '10px',
+                                        marginBottom: '15px',
+                                        border: '1px solid #ffc107'
+                                    }}>
+                                        <strong>Raison :</strong> {gameOverReason}
+                                    </p>
+                                )}
                                 <p style={{ color: '#666', fontSize: '1.2em' }}>
                                     Score final : <strong>{gameState.score}</strong>
                                 </p>

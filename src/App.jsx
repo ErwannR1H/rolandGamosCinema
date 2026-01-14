@@ -363,6 +363,15 @@ function Game() {
               <p style={{ fontSize: '1.2em', marginBottom: '20px' }}>
                 Cliquez sur "Nouvelle Partie" pour commencer à jouer !
               </p>
+
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
+                <label style={{ alignSelf: 'center' }}>Joueurs :</label>
+                <select value={playerCount} onChange={(e) => setPlayerCount(Number(e.target.value))} style={{ padding: '10px', borderRadius: '8px' }}>
+                  {[1,2,3,4,5].map(n => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              </div>
               <MessageContainer messages={messages} />
             </div>
           )}
@@ -375,6 +384,9 @@ function Game() {
           paddingTop: '20px',
           borderTop: '2px solid #eee'
         }}>
+          <button onClick={() => startNewGameWithCount(1)} style={{ ...buttonStyle(true), background: '#34c759' }}>
+            Mode Solo
+          </button>
           <button onClick={startNewGame} style={buttonStyle(true)}>
             Nouvelle Partie
           </button>
