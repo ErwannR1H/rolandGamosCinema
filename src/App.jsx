@@ -65,10 +65,13 @@ function Accueil() {
             marginBottom: '30px'
           }}>
             <h2 style={{ color: '#333', fontSize: '1.5em', marginBottom: '15px' }}>
-              À propos de l'application 
+              À propos de l'application
             </h2>
             <p style={{ color: '#666', fontSize: '1.1em', lineHeight: '1.6' }}>
-              TODO Description
+              Testez votre culture cinématographique avec notre jeu des acteurs !
+              Défiez vos amis en trouvant des acteurs ayant joué ensemble dans un même film.
+              L'application utilise les technologies du <strong>Web Sémantique</strong> (Wikidata & SPARQL)
+              pour vérifier en temps réel les liens entre acteurs et films.
             </p>
           </div>
 
@@ -82,10 +85,10 @@ function Accueil() {
                 Tester maintenant ses connaissances, seul ou à plusieurs !
               </button>
             </Link>
-            
+
             <Link to="/about" style={{ textDecoration: 'none' }}>
-              <button style={{ 
-                ...buttonStyle, 
+              <button style={{
+                ...buttonStyle,
                 width: '100%',
                 background: '#6c757d'
               }}>
@@ -117,6 +120,7 @@ function Game() {
     lastActor: null,
     isGameActive: false
   });
+  const [playerCount, setPlayerCount] = useState(2); // default 2 joueurs
 
   const [actorInput, setActorInput] = useState('');
   const [messages, setMessages] = useState([]);
@@ -131,18 +135,27 @@ function Game() {
     setMessages([]);
   };
 
-  const startNewGame = () => {
+  const startNewGameWithCount = (count) => {
+    const scores = {};
+    for (let i = 1; i <= count; i++) {
+      scores[`player${i}`] = 0;
+    }
+
+    setPlayerCount(count);
     setGameState({
       currentPlayer: 1,
-      scores: { player1: 0, player2: 0 },
+      scores,
       actorsHistory: [],
       lastActor: null,
-      isGameActive: true
+      isGameActive: true,
+      playerCount: count
     });
     setActorInput('');
     clearMessages();
     addMessage('Nouvelle partie commencée ! Joueur 1, entrez le nom d\'un acteur.', 'info');
   };
+
+  const startNewGame = () => startNewGameWithCount(playerCount);
 
   const endGame = (winner) => {
     setGameState(prev => ({ ...prev, isGameActive: false }));
@@ -155,12 +168,15 @@ function Game() {
       const scoreKey = `player${prev.currentPlayer}`;
       newScores[scoreKey]++;
 
+      const pc = prev.playerCount || playerCount || 2;
+      const nextPlayer = prev.currentPlayer === pc ? 1 : prev.currentPlayer + 1;
+
       return {
         ...prev,
         lastActor: actor,
         actorsHistory: [...prev.actorsHistory, { ...actor, player: prev.currentPlayer }],
         scores: newScores,
-        currentPlayer: prev.currentPlayer === 1 ? 2 : 1
+        currentPlayer: nextPlayer
       };
     });
     setActorInput('');
@@ -182,7 +198,9 @@ function Game() {
     // Vérifier si l'acteur a déjà été mentionné
     if (gameState.actorsHistory.some(a => a.label.toLowerCase() === actorName.toLowerCase())) {
       addMessage('Cet acteur a déjà été mentionné ! Le Joueur ' + gameState.currentPlayer + ' perd.', 'error');
-      endGame(gameState.currentPlayer === 1 ? 2 : 1);
+      const pc = gameState.playerCount || playerCount || 2;
+      const winnerDup = gameState.currentPlayer === pc ? 1 : gameState.currentPlayer + 1;
+      endGame(winnerDup);
       return;
     }
 
@@ -214,7 +232,9 @@ function Game() {
           `Aucun film commun trouvé entre ${gameState.lastActor.label} et ${actor.label}. Le Joueur ${gameState.currentPlayer} perd.`,
           'error'
         );
-        endGame(gameState.currentPlayer === 1 ? 2 : 1);
+        const pc2 = gameState.playerCount || playerCount || 2;
+        const winnerNoCommon = gameState.currentPlayer === pc2 ? 1 : gameState.currentPlayer + 1;
+        endGame(winnerNoCommon);
         setIsLoading(false);
         return;
       }
@@ -239,15 +259,15 @@ function Game() {
       addMessage('Aucune partie en cours.', 'error');
       return;
     }
-
-    const winner = gameState.currentPlayer === 1 ? 2 : 1;
+    const pc = gameState.playerCount || playerCount || 2;
+    const winner = gameState.currentPlayer === pc ? 1 : gameState.currentPlayer + 1;
     addMessage(`Le Joueur ${gameState.currentPlayer} abandonne. Le Joueur ${winner} gagne !`, 'info');
     endGame(winner);
   };
 
   const buttonStyle = (isPrimary) => {
     const baseColor = gameState.currentPlayer === 1 ? '#667eea' : '#f5576c';
-    
+
     return {
       flex: 1,
       padding: '15px 25px',
@@ -313,7 +333,7 @@ function Game() {
         <main>
           {gameState.isGameActive && (
             <>
-              <GameStatus 
+              <GameStatus
                 currentPlayer={gameState.currentPlayer}
                 scores={gameState.scores}
                 isGameActive={gameState.isGameActive}
@@ -321,7 +341,7 @@ function Game() {
 
               <LastActor lastActor={gameState.lastActor} />
 
-              <ActorInput 
+              <ActorInput
                 value={actorInput}
                 onChange={setActorInput}
                 onSubmit={handleSubmit}
@@ -345,8 +365,17 @@ function Game() {
               color: '#666'
             }}>
               <p style={{ fontSize: '1.2em', marginBottom: '20px' }}>
-                Cliquez sur "Nouvelle Partie" pour commencer à jouer !
+                Choisissez le nombre de joueurs puis cliquez sur "Nouvelle Partie".
               </p>
+
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
+                <label style={{ alignSelf: 'center' }}>Joueurs :</label>
+                <select value={playerCount} onChange={(e) => setPlayerCount(Number(e.target.value))} style={{ padding: '10px', borderRadius: '8px' }}>
+                  {[1,2,3,4,5].map(n => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              </div>
               <MessageContainer messages={messages} />
             </div>
           )}
@@ -359,6 +388,9 @@ function Game() {
           paddingTop: '20px',
           borderTop: '2px solid #eee'
         }}>
+          <button onClick={() => startNewGameWithCount(1)} style={{ ...buttonStyle(true), background: '#34c759' }}>
+            Mode Solo
+          </button>
           <button onClick={startNewGame} style={buttonStyle(true)}>
             Nouvelle Partie
           </button>
@@ -367,7 +399,7 @@ function Game() {
           </button>
         </div>
 
-        <RulesModal 
+        <RulesModal
           isOpen={isRulesOpen}
           onClose={() => setIsRulesOpen(false)}
         />
@@ -383,7 +415,7 @@ function App() {
       <Routes>
         {/* La route racine "/" affiche l'accueil */}
         <Route path="/" element={<Accueil />} />
-        
+
         {/* La route "/dashboard" affiche votre contenu actuel */}
         <Route path="/game" element={<Game />} />
       </Routes>
