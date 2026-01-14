@@ -41,8 +41,17 @@ function NetworkAnalysis() {
     };
 
     return (
-        <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
-            <h1>Analyse du Réseau d'Acteurs</h1>
+        <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            
+        }}>
+            <div
+            style={{background: 'white', padding: '30px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+
+            }}
+            >
+            <h1> 🕸️ Analyse du Réseau d'Acteurs</h1>
             <p>Téléchargez un graphe d'acteurs depuis Wikidata pour analyser les connexions et visualiser le réseau.</p>
             
             <GraphManager 
@@ -179,6 +188,8 @@ function NetworkAnalysis() {
                     </div>
                 </div>
             )}
+            </div>
+            
         </div>
     );
 }
