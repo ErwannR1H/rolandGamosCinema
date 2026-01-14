@@ -9,6 +9,7 @@ import RulesModal from './components/RulesModal';
 import ChallengeSetup from './components/ChallengeSetup';
 import ChallengeGame from './components/ChallengeGame';
 import NetworkAnalysis from './components/NetworkAnalysis';
+import SoloGame from './components/SoloGame';
 import { findActor, haveCommonMovie } from './services/sparqlService';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
@@ -564,7 +565,7 @@ function App() {
         <Route path="/" element={<Accueil />} />
         
         {/* Mode solo classique */}
-        <Route path="/classique" element={<Game />} />
+        <Route path="/classique" element={<SoloGame />} />
         
         {/* Mode multijoueur classique */}
         <Route path="/game" element={<Game />} />
