@@ -16,18 +16,18 @@ function GraphManager({ onGraphLoaded, onStartDownload }) {
     const [isDragOver, setIsDragOver] = useState(false);
     const fileInputRef = React.useRef(null);
 
-    useEffect(() => {
-        // Charger depuis le localStorage au démarrage
-        const savedGraph = loadGraphFromStorage();
-        if (savedGraph) {
-            setGraph(savedGraph);
-            setStats(computeGraphStats(savedGraph));
-            if (onGraphLoaded) {
-                onGraphLoaded(savedGraph);
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Ne s'exécute qu'au montage du composant
+    // useEffect(() => {
+    //     // Charger depuis le localStorage au démarrage
+    //     const savedGraph = loadGraphFromStorage();
+    //     if (savedGraph) {
+    //         setGraph(savedGraph);
+    //         setStats(computeGraphStats(savedGraph));
+    //         if (onGraphLoaded) {
+    //             onGraphLoaded(savedGraph);
+    //         }
+    //     }
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, []); // Ne s'exécute qu'au montage du composant
 
     const handleDownload = async (coreActors, maxTotal) => {
         setIsDownloading(true);

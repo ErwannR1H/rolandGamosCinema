@@ -19,7 +19,48 @@ export function findHubActors(graph, topN = 20) {
  * Utilise la notion de betweenness centrality (simplifié)
  * @param {Object} graph - Le graphe complet
  * @returns {Array}
+ * A CHANGER POUR QUE CE SOIT LES ACTEURS PIEGES : PRENDRE CEUX QUI SONT
+ * A UN SEUL ACTEUR TRES CONNECTES (PLUS DE 50) ET QUI LUI-MEME A PEU DE CONNEXIONS (MOINS DE ?)
+ * TESTER LES PARAMETRES ET VOIR LES RESULTATS
  */
+// export function findBridgeActors(graph) {
+//     const betweenness = new Map();
+    
+//     graph.actors.forEach(actor => {
+//         betweenness.set(actor.id, 0);
+//     });
+
+//     // Calcul simplifié : un acteur est un bridge s'il connecte des acteurs
+//     // qui ne sont pas directement connectés entre eux
+//     graph.actors.forEach(actor => {
+//         const coActors = new Set(actor.coActors);
+//         let bridgeScore = 0;
+        
+//         // Compter les paires de co-acteurs non connectées
+//         const coActorsList = Array.from(coActors);
+//         for (let i = 0; i < coActorsList.length; i++) {
+//             for (let j = i + 1; j < coActorsList.length; j++) {
+//                 const coActor1 = graph.actors.find(a => a.id === coActorsList[i]);
+//                 const coActor2 = graph.actors.find(a => a.id === coActorsList[j]);
+                
+//                 if (coActor1 && coActor2 && !coActor1.coActors.includes(coActor2.id)) {
+//                     bridgeScore++;
+//                 }
+//             }
+//         }
+        
+//         betweenness.set(actor.id, bridgeScore);
+//     });
+
+//     return graph.actors
+//         .map(actor => ({
+//             ...actor,
+//             bridgeScore: betweenness.get(actor.id)
+//         }))
+//         .sort((a, b) => b.bridgeScore - a.bridgeScore)
+//         .slice(0, 20);
+// }
+
 export function findBridgeActors(graph) {
     const betweenness = new Map();
     
@@ -27,34 +68,34 @@ export function findBridgeActors(graph) {
         betweenness.set(actor.id, 0);
     });
 
-    // Calcul simplifié : un acteur est un bridge s'il connecte des acteurs
-    // qui ne sont pas directement connectés entre eux
     graph.actors.forEach(actor => {
+        let trapScore = -1000;
         const coActors = new Set(actor.coActors);
-        let bridgeScore = 0;
         
-        // Compter les paires de co-acteurs non connectées
+        let bridge = 0
+        let bridgeDegree = 0;
         const coActorsList = Array.from(coActors);
         for (let i = 0; i < coActorsList.length; i++) {
-            for (let j = i + 1; j < coActorsList.length; j++) {
-                const coActor1 = graph.actors.find(a => a.id === coActorsList[i]);
-                const coActor2 = graph.actors.find(a => a.id === coActorsList[j]);
-                
-                if (coActor1 && coActor2 && !coActor1.coActors.includes(coActor2.id)) {
-                    bridgeScore++;
-                }
+            const a = graph.actors.find(a => a.id === coActorsList[i]);
+            if (a.degree > 75) {
+                bridge++;
+                bridgeDegree += a.degree;
             }
         }
+        if (bridge === 1) {
+            trapScore = bridgeDegree/10 - coActorsList.length;
+        }
+        betweenness.set(actor.id, trapScore);
         
-        betweenness.set(actor.id, bridgeScore);
     });
 
     return graph.actors
         .map(actor => ({
             ...actor,
-            bridgeScore: betweenness.get(actor.id)
+            trapScore: betweenness.get(actor.id)
+            
         }))
-        .sort((a, b) => b.bridgeScore - a.bridgeScore)
+        .sort((a, b) => b.trapScore - a.trapScore)
         .slice(0, 20);
 }
 

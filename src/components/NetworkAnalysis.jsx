@@ -20,6 +20,7 @@ function NetworkAnalysis() {
         // Calculer automatiquement les hubs et bridges
         const hubs = findHubActors(loadedGraph, 20);
         const bridges = findBridgeActors(loadedGraph);
+        console.log('Bridges trouvés:', bridges);
         setHubActors(hubs);
         setBridgeActors(bridges);
     };
