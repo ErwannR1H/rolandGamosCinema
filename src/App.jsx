@@ -332,24 +332,6 @@ function Game() {
       return;
     }
 
-    // Vérifier si l'acteur a déjà été mentionné
-    if (gameState.actorsHistory.some(a => a.label.toLowerCase() === actorName.toLowerCase())) {
-      addMessage('Cet acteur a déjà été mentionné ! Le Joueur ' + gameState.currentPlayer + ' perd.', 'error');
-      
-      // Déterminer le gagnant (tous les autres joueurs sauf celui qui a perdu)
-      const winners = [];
-      for (let i = 1; i <= playerCount; i++) {
-        if (i !== gameState.currentPlayer) {
-          winners.push(i);
-        }
-      }
-      const winnerText = winners.length > 1 
-        ? `Les Joueurs ${winners.join(', ')} gagnent` 
-        : `Le Joueur ${winners[0]} gagne`;
-      endGame(winnerText);
-      return;
-    }
-
     setIsLoading(true);
     clearMessages();
 
@@ -359,6 +341,29 @@ function Game() {
 
       if (!actor) {
         addMessage('Acteur non trouvé sur Wikidata. Essayez un autre nom.', 'error');
+        setIsLoading(false);
+        return;
+      }
+
+      // Vérifier si cet acteur (URI) a déjà été utilisé par n'importe quel joueur
+      const alreadyUsed = gameState.actorsHistory.some(a => a.actor === actor.actor);
+      if (alreadyUsed) {
+        addMessage(
+          `Cet acteur (${actor.label}) a déjà été mentionné ! Le Joueur ${gameState.currentPlayer} perd.`, 
+          'error'
+        );
+        
+        // Déterminer le gagnant (tous les autres joueurs sauf celui qui a perdu)
+        const winners = [];
+        for (let i = 1; i <= playerCount; i++) {
+          if (i !== gameState.currentPlayer) {
+            winners.push(i);
+          }
+        }
+        const winnerText = winners.length > 1 
+          ? `Les Joueurs ${winners.join(', ')} gagnent` 
+          : `Le Joueur ${winners[0]} gagne`;
+        endGame(winnerText);
         setIsLoading(false);
         return;
       }
