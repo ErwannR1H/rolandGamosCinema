@@ -37,10 +37,10 @@ function RulesModal({ isOpen, onClose }) {
         <h2 style={{ color: '#333', marginBottom: '20px' }}>Règles du jeu</h2>
         <ol style={{ marginLeft: '20px' }}>
           <li style={{ marginBottom: '10px', lineHeight: '1.6' }}>
-            Le Joueur 1 commence en donnant le nom d'un acteur de cinéma
+            Le premier joueur commence en donnant le nom d'un acteur de cinéma
           </li>
           <li style={{ marginBottom: '10px', lineHeight: '1.6' }}>
-            Le Joueur 2 doit donner le nom d'un acteur ayant joué dans un film commun avec l'acteur précédent
+            Le joueur suivant doit donner le nom d'un acteur ayant joué dans un film commun avec l'acteur précédent
           </li>
           <li style={{ marginBottom: '10px', lineHeight: '1.6' }}>
             Les joueurs alternent les tours
@@ -49,7 +49,7 @@ function RulesModal({ isOpen, onClose }) {
             Un acteur ne peut être mentionné qu'une seule fois par partie
           </li>
           <li style={{ marginBottom: '10px', lineHeight: '1.6' }}>
-            Si un joueur répète un acteur ou ne trouve pas de réponse valide, il perd
+            Si un joueur répète un acteur ou ne trouve pas de réponse valide, il perd et les autres continuent jursqu'à ce qu'il n'en reste qu'un !
           </li>
           <li style={{ marginBottom: '10px', lineHeight: '1.6' }}>
             Les données proviennent de Wikidata
