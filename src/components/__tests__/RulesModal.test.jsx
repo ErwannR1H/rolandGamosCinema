@@ -23,7 +23,7 @@ describe('RulesModal', () => {
       <RulesModal isOpen={true} onClose={() => {}} />
     );
     
-    expect(screen.getByText(/Le Joueur 1 commence/i)).toBeInTheDocument();
+    expect(screen.getByText(/Règles du jeu/i)).toBeInTheDocument();
   });
 
   test('appelle onClose quand on clique sur le X', () => {
