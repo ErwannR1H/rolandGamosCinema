@@ -7,6 +7,11 @@ describe('wikidataService', () => {
     beforeEach(() => {
         // Réinitialiser le mock avant chaque test
         fetch.mockClear();
+        // Nettoyer le localStorage avant chaque test (désactive le cache)
+        if (localStorage.clear) {
+            localStorage.clear.mockClear && localStorage.clear.mockClear();
+            localStorage.clear();
+        }
     });
 
     describe('findActorOnWikidata', () => {
@@ -97,7 +102,8 @@ describe('wikidataService', () => {
         });
 
         test('devrait gérer les erreurs de l\'API', async () => {
-            fetch.mockRejectedValueOnce(new Error('Network error'));
+            // Mocker 2 fois car le cache relance la fonction en cas d'erreur
+            fetch.mockRejectedValue(new Error('Network error'));
 
             await expect(findActorOnWikidata('Test')).rejects.toThrow('Network error');
         });
@@ -105,13 +111,39 @@ describe('wikidataService', () => {
 
     describe('findCommonMovieOnWikidata', () => {
         test('devrait trouver un film commun entre deux acteurs', async () => {
+            // Mock pour getActorFilmsSet - acteur 1
+            fetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    results: {
+                        bindings: [
+                            { movie: { value: 'http://www.wikidata.org/entity/Q456' } },
+                            { movie: { value: 'http://www.wikidata.org/entity/Q999' } }
+                        ]
+                    }
+                })
+            });
+
+            // Mock pour getActorFilmsSet - acteur 2
+            fetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    results: {
+                        bindings: [
+                            { movie: { value: 'http://www.wikidata.org/entity/Q456' } },
+                            { movie: { value: 'http://www.wikidata.org/entity/Q888' } }
+                        ]
+                    }
+                })
+            });
+
+            // Mock pour getMovieDetails
             fetch.mockResolvedValueOnce({
                 ok: true,
                 json: async () => ({
                     results: {
                         bindings: [
                             {
-                                movie: { value: 'http://www.wikidata.org/entity/Q456' },
                                 movieLabel: { value: 'Forrest Gump' },
                                 poster: { value: 'https://example.com/poster.jpg' }
                             }
@@ -130,17 +162,34 @@ describe('wikidataService', () => {
                 title: 'Forrest Gump',
                 movieLabel: 'Forrest Gump',
                 moviePosterUrl: 'https://example.com/poster.jpg',
-                source: 'Wikidata'
+                source: 'Wikidata (cached)'
             });
 
-            expect(fetch).toHaveBeenCalledTimes(1);
+            expect(fetch).toHaveBeenCalledTimes(3); // 2 pour les films + 1 pour les détails
         });
 
         test('devrait retourner null si aucun film commun', async () => {
+            // Mock pour getActorFilmsSet - acteur 1
             fetch.mockResolvedValueOnce({
                 ok: true,
                 json: async () => ({
-                    results: { bindings: [] }
+                    results: {
+                        bindings: [
+                            { movie: { value: 'http://www.wikidata.org/entity/Q111' } }
+                        ]
+                    }
+                })
+            });
+
+            // Mock pour getActorFilmsSet - acteur 2 (aucun film en commun)
+            fetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    results: {
+                        bindings: [
+                            { movie: { value: 'http://www.wikidata.org/entity/Q222' } }
+                        ]
+                    }
                 })
             });
 
@@ -153,13 +202,37 @@ describe('wikidataService', () => {
         });
 
         test('devrait gérer un film sans affiche', async () => {
+            // Mock pour getActorFilmsSet - acteur 1
+            fetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    results: {
+                        bindings: [
+                            { movie: { value: 'http://www.wikidata.org/entity/Q456' } }
+                        ]
+                    }
+                })
+            });
+
+            // Mock pour getActorFilmsSet - acteur 2
+            fetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    results: {
+                        bindings: [
+                            { movie: { value: 'http://www.wikidata.org/entity/Q456' } }
+                        ]
+                    }
+                })
+            });
+
+            // Mock pour getMovieDetails - sans poster
             fetch.mockResolvedValueOnce({
                 ok: true,
                 json: async () => ({
                     results: {
                         bindings: [
                             {
-                                movie: { value: 'http://www.wikidata.org/entity/Q456' },
                                 movieLabel: { value: 'Some Movie' }
                                 // Pas de poster
                             }
@@ -177,9 +250,22 @@ describe('wikidataService', () => {
         });
 
         test('devrait gérer les erreurs SPARQL', async () => {
+            // Mock pour getActorFilmsSet - acteur 1 avec erreur
             fetch.mockResolvedValueOnce({
                 ok: false,
                 status: 500
+            });
+
+            // Mock pour getActorFilmsSet - acteur 2
+            fetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    results: {
+                        bindings: [
+                            { movie: { value: 'http://www.wikidata.org/entity/Q456' } }
+                        ]
+                    }
+                })
             });
 
             const result = await findCommonMovieOnWikidata(

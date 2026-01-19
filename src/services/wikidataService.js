@@ -3,6 +3,8 @@
  * Utilise l'API Wikibase Search et SPARQL Query Service
  */
 
+import { getCachedOrFetch } from './cacheService.js';
+
 const WIKIDATA_SEARCH_API = 'https://www.wikidata.org/w/api.php';
 const WIKIDATA_SPARQL_ENDPOINT = 'https://query.wikidata.org/sparql';
 
@@ -12,55 +14,59 @@ const WIKIDATA_SPARQL_ENDPOINT = 'https://query.wikidata.org/sparql';
  * @returns {Promise<Object|null>}
  */
 export async function findActorOnWikidata(actorName) {
-    try {
-        // Étape 1: Rechercher l'acteur via l'API de recherche Wikidata
-        const searchUrl = `${WIKIDATA_SEARCH_API}?` + new URLSearchParams({
-            action: 'wbsearchentities',
-            search: actorName,
-            language: 'en',
-            format: 'json',
-            type: 'item',
-            limit: '10',
-            origin: '*'
-        });
+    const cacheKey = `actor_search:${actorName.toLowerCase()}`;
+    
+    return await getCachedOrFetch(cacheKey, async () => {
+        try {
+            // Étape 1: Rechercher l'acteur via l'API de recherche Wikidata
+            const searchUrl = `${WIKIDATA_SEARCH_API}?` + new URLSearchParams({
+                action: 'wbsearchentities',
+                search: actorName,
+                language: 'en',
+                format: 'json',
+                type: 'item',
+                limit: '10',
+                origin: '*'
+            });
 
-        const searchResponse = await fetch(searchUrl);
-        if (!searchResponse.ok) {
-            throw new Error(`Erreur recherche Wikidata: ${searchResponse.status}`);
-        }
-
-        const searchData = await searchResponse.json();
-        
-        if (!searchData.search || searchData.search.length === 0) {
-            return null;
-        }
-
-        // Étape 2: Vérifier que les résultats sont des acteurs
-        for (const result of searchData.search) {
-            const entityId = result.id;
-            
-            // Vérifier si c'est un acteur via SPARQL
-            const isActor = await checkIfActor(entityId);
-            
-            if (isActor) {
-                // Récupérer l'image de l'acteur si disponible
-                const imageUrl = await getActorImage(entityId);
-                
-                return {
-                    actor: `http://www.wikidata.org/entity/${entityId}`,
-                    label: result.label,
-                    description: result.description || '',
-                    wikidataUrl: `https://www.wikidata.org/wiki/${entityId}`,
-                    imageUrl: imageUrl
-                };
+            const searchResponse = await fetch(searchUrl);
+            if (!searchResponse.ok) {
+                throw new Error(`Erreur recherche Wikidata: ${searchResponse.status}`);
             }
-        }
 
-        return null;
-    } catch (error) {
-        console.error('Erreur recherche acteur Wikidata:', error);
-        throw error;
-    }
+            const searchData = await searchResponse.json();
+            
+            if (!searchData.search || searchData.search.length === 0) {
+                return null;
+            }
+
+            // Étape 2: Vérifier que les résultats sont des acteurs
+            for (const result of searchData.search) {
+                const entityId = result.id;
+                
+                // Vérifier si c'est un acteur via SPARQL
+                const isActor = await checkIfActor(entityId);
+                
+                if (isActor) {
+                    // Récupérer l'image de l'acteur si disponible
+                    const imageUrl = await getActorImage(entityId);
+                    
+                    return {
+                        actor: `http://www.wikidata.org/entity/${entityId}`,
+                        label: result.label,
+                        description: result.description || '',
+                        wikidataUrl: `https://www.wikidata.org/wiki/${entityId}`,
+                        imageUrl: imageUrl
+                    };
+                }
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Erreur recherche acteur Wikidata:', error);
+            throw error;
+        }
+    });
 }
 
 /**
@@ -69,37 +75,41 @@ export async function findActorOnWikidata(actorName) {
  * @returns {Promise<boolean>}
  */
 async function checkIfActor(entityId) {
-    const query = `
-        ASK {
-            {
-                wd:${entityId} wdt:P106 wd:Q33999 .  # acteur/actrice
-            } UNION {
-                wd:${entityId} wdt:P106 wd:Q10800557 .  # acteur de cinéma
-            } UNION {
-                wd:${entityId} wdt:P106 wd:Q10798782 .  # acteur de télévision
-            } UNION {
-                wd:${entityId} wdt:P106 wd:Q948329 .  # acteur de théâtre
+    const cacheKey = `check_actor:${entityId}`;
+    
+    return await getCachedOrFetch(cacheKey, async () => {
+        const query = `
+            ASK {
+                {
+                    wd:${entityId} wdt:P106 wd:Q33999 .  # acteur/actrice
+                } UNION {
+                    wd:${entityId} wdt:P106 wd:Q10800557 .  # acteur de cinéma
+                } UNION {
+                    wd:${entityId} wdt:P106 wd:Q10798782 .  # acteur de télévision
+                } UNION {
+                    wd:${entityId} wdt:P106 wd:Q948329 .  # acteur de théâtre
+                }
             }
-        }
-    `;
+        `;
 
-    try {
-        const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
-            query: query,
-            format: 'json'
-        });
+        try {
+            const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
+                query: query,
+                format: 'json'
+            });
 
-        const response = await fetch(url);
-        if (!response.ok) {
+            const response = await fetch(url);
+            if (!response.ok) {
+                return false;
+            }
+
+            const data = await response.json();
+            return data.boolean === true;
+        } catch (error) {
+            console.error('Erreur vérification acteur:', error);
             return false;
         }
-
-        const data = await response.json();
-        return data.boolean === true;
-    } catch (error) {
-        console.error('Erreur vérification acteur:', error);
-        return false;
-    }
+    });
 }
 
 /**
@@ -108,38 +118,127 @@ async function checkIfActor(entityId) {
  * @returns {Promise<string|null>}
  */
 async function getActorImage(entityId) {
-    const query = `
-        SELECT ?image WHERE {
-            wd:${entityId} wdt:P18 ?image .
-        }
-        LIMIT 1
-    `;
+    const cacheKey = `actor_image:${entityId}`;
+    
+    return await getCachedOrFetch(cacheKey, async () => {
+        const query = `
+            SELECT ?image WHERE {
+                wd:${entityId} wdt:P18 ?image .
+            }
+            LIMIT 1
+        `;
 
-    try {
+        try {
+            const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
+                query: query,
+                format: 'json'
+            });
+
+            const response = await fetch(url);
+            if (!response.ok) {
+                return null;
+            }
+
+            const data = await response.json();
+            if (data.results.bindings.length > 0) {
+                return data.results.bindings[0].image.value;
+            }
+            return null;
+        } catch (error) {
+            console.error('Erreur récupération image:', error);
+            return null;
+        }
+    });
+}
+
+/**
+ * Récupère TOUS les films d'un acteur (pour comparaison en JS)
+ * @param {string} actorUri - URI de l'acteur
+ * @returns {Promise<Set<string>>} - Set d'URIs de films
+ */
+export async function getActorFilmsSet(actorUri) {
+    const actorId = actorUri.split('/').pop();
+    const cacheKey = `actor_films:${actorId}`;
+    
+    // Récupérer l'array depuis le cache, puis convertir en Set
+    const filmUrisArray = await getCachedOrFetch(cacheKey, async () => {
+        const query = `
+            SELECT DISTINCT ?movie WHERE {
+                ?movie wdt:P161 wd:${actorId} .
+                
+                {
+                    ?movie wdt:P31/wdt:P279* wd:Q11424 .
+                } UNION {
+                    ?movie wdt:P31/wdt:P279* wd:Q5398426 .
+                }
+            }
+        `;
+        
         const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
             query: query,
             format: 'json'
         });
-
+        
         const response = await fetch(url);
         if (!response.ok) {
-            return null;
+            return [];
         }
-
+        
         const data = await response.json();
-        if (data.results.bindings.length > 0) {
-            return data.results.bindings[0].image.value;
-        }
-        return null;
-    } catch (error) {
-        console.error('Erreur récupération image:', error);
-        return null;
+        const filmUris = data.results.bindings.map(b => b.movie.value);
+        
+        // Stocker un Array (JSON-sérialisable) au lieu d'un Set
+        return filmUris;
+    });
+    
+    // Convertir l'array en Set pour les opérations d'intersection
+    // Gérer le cas où filmUrisArray est null ou undefined
+    if (!filmUrisArray || !Array.isArray(filmUrisArray)) {
+        return new Set();
     }
+    return new Set(filmUrisArray);
+}
+
+/**
+ * Récupère les détails d'un film (titre, poster)
+ * @param {string} movieId - ID Wikidata du film
+ * @returns {Promise<Object>}
+ */
+async function getMovieDetails(movieId) {
+    const cacheKey = `movie_details:${movieId}`;
+    
+    return await getCachedOrFetch(cacheKey, async () => {
+        const query = `
+            SELECT ?movieLabel ?poster WHERE {
+                BIND(wd:${movieId} AS ?movie)
+                OPTIONAL { ?movie wdt:P18 ?poster . }
+                SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
+            }
+        `;
+        
+        const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
+            query: query,
+            format: 'json'
+        });
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+            return { title: 'Film inconnu', poster: null };
+        }
+        
+        const data = await response.json();
+        const result = data.results.bindings[0];
+        
+        return {
+            title: result?.movieLabel?.value || 'Film inconnu',
+            poster: result?.poster?.value || null
+        };
+    });
 }
 
 /**
  * Vérifie si deux acteurs ont joué dans un film commun sur Wikidata
- * Utilise une seule requête SPARQL optimisée
+ * Version optimisée avec cache et intersection JS
  * @param {string} actor1Uri - URI du premier acteur
  * @param {string} actor2Uri - URI du second acteur
  * @returns {Promise<Object|null>}
@@ -158,58 +257,34 @@ export async function findCommonMovieOnWikidata(actor1Uri, actor2Uri) {
         
         console.log(`Recherche de films communs entre ${actor1Id} et ${actor2Id}`);
         
-        // Requête SPARQL optimisée pour trouver les films communs en une seule fois
-        const query = `
-            SELECT DISTINCT ?movie ?movieLabel ?poster WHERE {
-                # Le film doit avoir les deux acteurs dans son casting
-                ?movie wdt:P161 wd:${actor1Id} .
-                ?movie wdt:P161 wd:${actor2Id} .
-                
-                # C'est un film ou une série TV
-                {
-                    ?movie wdt:P31/wdt:P279* wd:Q11424 .  # film
-                } UNION {
-                    ?movie wdt:P31/wdt:P279* wd:Q5398426 .  # série TV
-                }
-                
-                # Récupérer l'affiche si disponible
-                OPTIONAL { ?movie wdt:P18 ?poster . }
-                
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
-            }
-            LIMIT 10
-        `;
-
-        const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
-            query: query,
-            format: 'json'
-        });
-
-        const response = await fetch(url);
-        if (!response.ok) {
-            console.warn(`Erreur SPARQL: ${response.status}`);
+        // Récupérer les sets de films (depuis le cache si possible)
+        const [films1, films2] = await Promise.all([
+            getActorFilmsSet(actor1Uri),
+            getActorFilmsSet(actor2Uri)
+        ]);
+        
+        // Calculer l'intersection en JS
+        const commonFilms = [...films1].filter(film => films2.has(film));
+        
+        if (commonFilms.length === 0) {
+            console.log('Aucun film commun trouvé');
             return null;
         }
-
-        const data = await response.json();
-        const results = data.results.bindings;
-
-        if (results.length === 0) {
-            console.log(`Aucun film commun trouvé`);
-            return null;
-        }
-
-        console.log(`${results.length} film(s) commun(s) trouvé(s)`);
-        console.log(`Films communs:`, results.map(r => r.movieLabel.value));
-
-        const firstResult = results[0];
+        
+        console.log(`${commonFilms.length} film(s) commun(s) trouvé(s)`);
+        
+        // Récupérer les détails du premier film commun
+        const movieUri = commonFilms[0];
+        const movieId = movieUri.split('/').pop();
+        
+        const movieDetails = await getMovieDetails(movieId);
         
         return {
-            movie: firstResult.movie.value,
-            title: firstResult.movieLabel.value,
-            movieLabel: firstResult.movieLabel.value,
-            moviePosterUrl: firstResult.poster ? firstResult.poster.value : null,
-            source: 'Wikidata'
+            movie: movieUri,
+            title: movieDetails.title,
+            movieLabel: movieDetails.title,
+            moviePosterUrl: movieDetails.poster,
+            source: 'Wikidata (cached)'
         };
     } catch (error) {
         console.error('Erreur vérification films communs Wikidata:', error);
@@ -222,6 +297,7 @@ export async function findCommonMovieOnWikidata(actor1Uri, actor2Uri) {
  * @returns {Promise<Object|null>}
  */
 export async function getRandomActor() {
+    // Note: Ne pas cacher cette fonction car elle doit retourner un acteur différent à chaque appel
     try {
         // Requête SPARQL pour obtenir un acteur aléatoire
         // On cherche des acteurs célèbres avec une photo
@@ -365,48 +441,51 @@ export async function generateRandomChallenge(minLength = 3, maxLength = 8) {
 }
 
 /**
- * Récupère tous les films dans lesquels un acteur a joué
+ * Récupère tous les films dans lesquels un acteur a joué (avec détails)
  * @param {string} actorUri - URI de l'acteur
  * @returns {Promise<Array>}
  */
 async function getActorFilms(actorUri) {
-    try {
-        const actorId = actorUri.split('/').pop();
-        
-        const query = `
-            SELECT DISTINCT ?movie ?movieLabel WHERE {
-                ?movie wdt:P161 wd:${actorId} .
-                
-                {
-                    ?movie wdt:P31/wdt:P279* wd:Q11424 .
-                } UNION {
-                    ?movie wdt:P31/wdt:P279* wd:Q5398426 .
+    const actorId = actorUri.split('/').pop();
+    const cacheKey = `actor_films_details:${actorId}`;
+    
+    return await getCachedOrFetch(cacheKey, async () => {
+        try {
+            const query = `
+                SELECT DISTINCT ?movie ?movieLabel WHERE {
+                    ?movie wdt:P161 wd:${actorId} .
+                    
+                    {
+                        ?movie wdt:P31/wdt:P279* wd:Q11424 .
+                    } UNION {
+                        ?movie wdt:P31/wdt:P279* wd:Q5398426 .
+                    }
+                    
+                    SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
                 }
-                
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
+                LIMIT 50
+            `;
+            
+            const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
+                query: query,
+                format: 'json'
+            });
+            
+            const response = await fetch(url);
+            if (!response.ok) {
+                return [];
             }
-            LIMIT 50
-        `;
-        
-        const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
-            query: query,
-            format: 'json'
-        });
-        
-        const response = await fetch(url);
-        if (!response.ok) {
+            
+            const data = await response.json();
+            return data.results.bindings.map(b => ({
+                movie: b.movie.value,
+                title: b.movieLabel.value
+            }));
+        } catch (error) {
+            console.error('Erreur récupération films acteur:', error);
             return [];
         }
-        
-        const data = await response.json();
-        return data.results.bindings.map(b => ({
-            movie: b.movie.value,
-            title: b.movieLabel.value
-        }));
-    } catch (error) {
-        console.error('Erreur récupération films acteur:', error);
-        return [];
-    }
+    });
 }
 
 /**
@@ -416,49 +495,52 @@ async function getActorFilms(actorUri) {
  * @returns {Promise<Array>}
  */
 async function getFilmActors(movieUri, excludeActorUri) {
-    try {
-        const movieId = movieUri.split('/').pop();
-        const excludeActorId = excludeActorUri.split('/').pop();
-        
-        const query = `
-            SELECT DISTINCT ?actor ?actorLabel ?image WHERE {
-                wd:${movieId} wdt:P161 ?actor .
-                
-                FILTER(?actor != wd:${excludeActorId})
-                
-                ?actor wdt:P106 wd:Q33999 .
-                
-                OPTIONAL { ?actor wdt:P18 ?image . }
-                
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
+    const movieId = movieUri.split('/').pop();
+    const excludeActorId = excludeActorUri.split('/').pop();
+    const cacheKey = `film_actors:${movieId}:exclude_${excludeActorId}`;
+    
+    return await getCachedOrFetch(cacheKey, async () => {
+        try {
+            const query = `
+                SELECT DISTINCT ?actor ?actorLabel ?image WHERE {
+                    wd:${movieId} wdt:P161 ?actor .
+                    
+                    FILTER(?actor != wd:${excludeActorId})
+                    
+                    ?actor wdt:P106 wd:Q33999 .
+                    
+                    OPTIONAL { ?actor wdt:P18 ?image . }
+                    
+                    SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
+                }
+                LIMIT 20
+            `;
+            
+            const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
+                query: query,
+                format: 'json'
+            });
+            
+            const response = await fetch(url);
+            if (!response.ok) {
+                return [];
             }
-            LIMIT 20
-        `;
-        
-        const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
-            query: query,
-            format: 'json'
-        });
-        
-        const response = await fetch(url);
-        if (!response.ok) {
+            
+            const data = await response.json();
+            return data.results.bindings.map(b => {
+                const actorId = b.actor.value.split('/').pop();
+                return {
+                    actor: b.actor.value,
+                    label: b.actorLabel.value,
+                    imageUrl: b.image ? b.image.value : null,
+                    wikidataUrl: `https://www.wikidata.org/wiki/${actorId}`
+                };
+            });
+        } catch (error) {
+            console.error('Erreur récupération acteurs film:', error);
             return [];
         }
-        
-        const data = await response.json();
-        return data.results.bindings.map(b => {
-            const actorId = b.actor.value.split('/').pop();
-            return {
-                actor: b.actor.value,
-                label: b.actorLabel.value,
-                imageUrl: b.image ? b.image.value : null,
-                wikidataUrl: `https://www.wikidata.org/wiki/${actorId}`
-            };
-        });
-    } catch (error) {
-        console.error('Erreur récupération acteurs film:', error);
-        return [];
-    }
+    });
 }
 
 /**
