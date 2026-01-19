@@ -6,12 +6,14 @@ function ChallengeSetup({ onStartChallenge }) {
   const [actorSelection, setActorSelection] = useState('none'); // 'none', 'one', 'both'
   const [startActor, setStartActor] = useState('');
   const [endActor, setEndActor] = useState('');
+  const [maxPathLength, setMaxPathLength] = useState(7);
 
   const handleStart = () => {
     const config = {
       actorSelection,
       startActor: actorSelection === 'both' || actorSelection === 'one' ? startActor : null,
-      endActor: actorSelection === 'both' ? endActor : null
+      endActor: actorSelection === 'both' ? endActor : null,
+      maxPathLength
     };
     onStartChallenge(config);
   };
@@ -185,6 +187,70 @@ function ChallengeSetup({ onStartChallenge }) {
                 }}
               />
             )}
+          </div>
+        )}
+
+        {actorSelection !== 'both' && (
+          <div style={{ marginBottom: '30px' }}>
+            <h3 style={{ color: '#333', marginBottom: '15px' }}>
+              Longueur maximale du chemin
+            </h3>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+              background: '#f8f9fa',
+              padding: '20px',
+              borderRadius: '10px'
+            }}>
+              <div style={{ flex: 1 }}>
+                <input
+                  type="range"
+                  min="3"
+                  max="10"
+                  value={maxPathLength}
+                  onChange={(e) => setMaxPathLength(Number(e.target.value))}
+                  style={{
+                    width: '100%',
+                    cursor: 'pointer'
+                  }}
+                />
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: '0.9em',
+                  color: '#666',
+                  marginTop: '5px'
+                }}>
+                  <span>3 (facile)</span>
+                  <span>10 (difficile)</span>
+                </div>
+              </div>
+              <div style={{
+                fontSize: '2em',
+                fontWeight: 'bold',
+                color: '#f5576c',
+                minWidth: '60px',
+                textAlign: 'center'
+              }}>
+                {maxPathLength}
+              </div>
+            </div>
+            <p style={{ 
+              fontSize: '0.9em', 
+              color: '#666', 
+              marginTop: '10px',
+              fontStyle: 'italic'
+            }}>
+              {maxPathLength === 3 && "1 acteur intermédiaire (très facile)"}
+              {maxPathLength === 4 && "2 acteurs intermédiaires (facile)"}
+              {maxPathLength === 5 && "3 acteurs intermédiaires (moyen)"}
+              {maxPathLength === 6 && "4 acteurs intermédiaires (moyen)"}
+              {maxPathLength === 7 && "5 acteurs intermédiaires (difficile)"}
+              {maxPathLength === 8 && "6 acteurs intermédiaires (difficile)"}
+              {maxPathLength === 9 && "7 acteurs intermédiaires (très difficile)"}
+              {maxPathLength === 10 && "8 acteurs intermédiaires (expert)"}
+            </p>
           </div>
         )}
 

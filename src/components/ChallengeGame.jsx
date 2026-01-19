@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { findActor, haveCommonMovie } from '../services/sparqlService';
-import { getRandomActor, generateRandomChallenge, generatePathBetweenActors } from '../services/wikidataService';
+import { getRandomActor, generateRandomChallenge, generatePathBetweenActors, generateRandomChallengeFromStart } from '../services/wikidataService';
 
 function ChallengeGame({ config, onReset }) {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ function ChallengeGame({ config, onReset }) {
   const [solutionPath, setSolutionPath] = useState(null);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [hintMessage, setHintMessage] = useState('');
+  const [showSolution, setShowSolution] = useState(false);
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -45,26 +46,42 @@ function ChallengeGame({ config, onReset }) {
         setStartActor(start);
         setEndActor(end);
         setPath([start]);
-        setSolutionPath(null); // Pas de solution pré-calculée
+        setSolutionPath(null); // Pas de chemin pré-calculé en mode "both"
+        console.log('Défi initialisé avec les deux acteurs choisis');
       } else if (config.actorSelection === 'one') {
-        // Un acteur fourni, l'autre aléatoire
+        // Un acteur fourni, construire un chemin aléatoire pour découvrir l'acteur d'arrivée
         const start = await findActor(config.startActor);
-        const end = await getRandomActor();
         
-        if (!start || !end) {
-          setMessage('Erreur: Impossible de récupérer les acteurs');
+        if (!start) {
+          setMessage('Erreur: Acteur de départ non trouvé');
           setIsLoading(false);
           return;
         }
         
-        setStartActor(start);
-        setEndActor(end);
-        setPath([start]);
-        setSolutionPath(null); // Pas de solution pré-calculée
+        // Générer un chemin aléatoire depuis l'acteur de départ
+        setMessage('Génération d\'un chemin aléatoire...');
+        const maxLength = config.maxPathLength || 7;
+        const challenge = await generateRandomChallengeFromStart(start, 3, maxLength);
+        
+        if (!challenge) {
+          setMessage(`❌ Impossible de générer un chemin depuis ${start.label}. Réessayez.`);
+          setIsLoading(false);
+          setTimeout(() => {
+            navigate('/defi');
+          }, 3000);
+          return;
+        }
+        
+        setStartActor(challenge.startActor);
+        setEndActor(challenge.endActor);
+        setPath([challenge.startActor]);
+        setSolutionPath(challenge.path);
+        console.log('Chemin aléatoire généré depuis acteur de départ:', challenge);
       } else {
         // Générer un défi aléatoire complet avec chemin pré-calculé
         setMessage('Génération d\'un défi aléatoire...');
-        const challenge = await generateRandomChallenge(3, 8);
+        const maxLength = config.maxPathLength || 7;
+        const challenge = await generateRandomChallenge(3, maxLength);
         
         if (!challenge) {
           setMessage('Erreur: Impossible de générer un défi aléatoire');
@@ -86,7 +103,8 @@ function ChallengeGame({ config, onReset }) {
       setIsLoading(false);
     } catch (error) {
       console.error('Erreur lors de l\'initialisation:', error);
-      setMessage('Erreur lors de l\'initialisation du défi');
+      const errorMessage = error.message || 'Erreur lors de l\'initialisation du défi';
+      setMessage(errorMessage);
       setIsLoading(false);
     }
   };
@@ -109,7 +127,8 @@ function ChallengeGame({ config, onReset }) {
         
         if (errors + 1 >= 3) {
           setGameOver(true);
-          setMessage(`💀 Défaite ! Vous avez fait 3 erreurs. Le chemin vers ${endActor.name} était introuvable.`);
+          setShowSolution(true);
+          setMessage(`💀 Défaite ! Vous avez fait 3 erreurs. Voici un exemple de chemin possible :`);
         }
         return;
       }
@@ -123,7 +142,8 @@ function ChallengeGame({ config, onReset }) {
         
         if (errors + 1 >= 3) {
           setGameOver(true);
-          setMessage(`💀 Défaite ! Vous avez fait 3 erreurs.`);
+          setShowSolution(true);
+          setMessage(`💀 Défaite ! Vous avez fait 3 erreurs. Voici un exemple de chemin possible :`);
         }
         return;
       }
@@ -145,7 +165,8 @@ function ChallengeGame({ config, onReset }) {
           
           if (errors + 1 >= 3) {
             setGameOver(true);
-            setMessage(`💀 Défaite ! Vous avez fait 3 erreurs.`);
+            setShowSolution(true);
+            setMessage(`💀 Défaite ! Vous avez fait 3 erreurs. Voici un exemple de chemin possible :`);
           }
         }
         setCurrentInput('');
@@ -166,7 +187,8 @@ function ChallengeGame({ config, onReset }) {
         
         if (errors + 1 >= 3) {
           setGameOver(true);
-          setMessage(`💀 Défaite ! Vous avez fait 3 erreurs.`);
+          setShowSolution(true);
+          setMessage(`💀 Défaite ! Vous avez fait 3 erreurs. Voici un exemple de chemin possible :`);
         }
       }
 
@@ -181,16 +203,18 @@ function ChallengeGame({ config, onReset }) {
 
   const handleAbandon = () => {
     if (window.confirm('Voulez-vous vraiment abandonner ce défi ?')) {
-      navigate('/defi');
+      setGameOver(true);
+      setShowSolution(true);
+      setMessage(`😔 Vous avez abandonné. Voici un exemple de chemin possible :`);
     }
   };
 
   const handleHint = async () => {
     if (gameOver || isLoading) return;
     
-    // Vérifier si on a un chemin solution (mode aléatoire)
-    if (!solutionPath) {
-      setHintMessage('❌ Les indices ne sont disponibles qu\'en mode "Le jeu choisit les deux acteurs"');
+    // Vérifier si on a un chemin solution
+    if (!solutionPath || solutionPath.length === 0) {
+      setHintMessage('❌ Aucun indice disponible');
       return;
     }
     
@@ -594,6 +618,106 @@ function ChallengeGame({ config, onReset }) {
           </div>
         )}
 
+        {/* Affichage de la solution en cas de défaite */}
+        {gameOver && showSolution && solutionPath && solutionPath.length > 0 && (
+          <div style={{
+            background: 'white',
+            borderRadius: '15px',
+            padding: '20px',
+            marginBottom: '20px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            <h3 style={{ marginTop: 0, color: '#333', textAlign: 'center' }}>
+              💡 Un exemple de chemin possible :
+            </h3>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              gap: '15px',
+              padding: '15px',
+              background: '#f8f9fa',
+              borderRadius: '10px'
+            }}>
+              {/* Acteur de départ */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}>
+                <div style={{
+                  padding: '10px 20px',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  borderRadius: '25px',
+                  fontWeight: 'bold',
+                  minWidth: '150px',
+                  textAlign: 'center'
+                }}>
+                  {startActor.label}
+                </div>
+              </div>
+              
+              {/* Étapes du chemin */}
+              {solutionPath.map((step, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '5px',
+                  paddingLeft: '20px'
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '10px',
+                    color: '#666'
+                  }}>
+                    <span style={{ fontSize: '1.5em' }}>↓</span>
+                    <span style={{ fontSize: '0.9em', fontStyle: 'italic' }}>via</span>
+                    <div style={{
+                      padding: '5px 15px',
+                      background: '#fff',
+                      borderRadius: '15px',
+                      fontSize: '0.9em',
+                      border: '2px solid #ffc107'
+                    }}>
+                      🎬 {step.film.title}
+                    </div>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px'
+                  }}>
+                    <span style={{ fontSize: '1.5em', color: '#666' }}>↓</span>
+                    <div style={{
+                      padding: '10px 20px',
+                      background: index === solutionPath.length - 1 
+                        ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+                        : 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                      color: 'white',
+                      borderRadius: '25px',
+                      fontWeight: 'bold',
+                      minWidth: '150px',
+                      textAlign: 'center'
+                    }}>
+                      {step.nextActor.label}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p style={{ 
+              fontSize: '0.9em', 
+              color: '#666', 
+              marginTop: '15px',
+              textAlign: 'center',
+              fontStyle: 'italic'
+            }}>
+              Ce chemin comporte {solutionPath.length + 1} étapes. Il existe peut-être d'autres chemins possibles !
+            </p>
+          </div>
+        )}
+
         {/* Boutons de fin de partie */}
         {gameOver && (
           <div style={{
@@ -617,7 +741,7 @@ function ChallengeGame({ config, onReset }) {
                   fontWeight: '600'
                 }}
               >
-                Nouveau défi
+                Retour au menu défi
               </button>
               <button
                 onClick={() => navigate('/')}

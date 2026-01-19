@@ -293,14 +293,65 @@ export async function findCommonMovieOnWikidata(actor1Uri, actor2Uri) {
 }
 
 /**
+ * Cache des acteurs populaires chargé depuis le fichier JSON
+ */
+let popularActorsCache = null;
+let cacheGenerationAttempted = false;
+
+/**
+ * Charge le cache des acteurs populaires depuis le fichier JSON
+ * Si le fichier n'existe pas, affiche un message pour générer le cache
+ */
+async function loadPopularActorsCache() {
+    if (popularActorsCache !== null) {
+        return popularActorsCache;
+    }
+
+    try {
+        const response = await fetch('/popular-actors.json');
+        if (!response.ok) {
+            if (!cacheGenerationAttempted) {
+                cacheGenerationAttempted = true;
+                console.warn('⚠️ Cache des acteurs populaires non trouvé.');
+                console.info('💡 Pour améliorer les performances, exécutez: npm run generate-cache');
+                console.info('📝 Utilisation de la méthode SPARQL (plus lente)...');
+            }
+            return null;
+        }
+        const data = await response.json();
+        
+        // Filtrer uniquement les acteurs avec image
+        popularActorsCache = data.filter(actor => actor.imageUrl);
+        
+        console.log(`✅ Cache chargé: ${popularActorsCache.length} acteurs populaires disponibles`);
+        return popularActorsCache;
+    } catch (error) {
+        console.warn('Erreur chargement cache acteurs:', error);
+        return null;
+    }
+}
+
+/**
  * Récupère un acteur aléatoire depuis Wikidata
+ * Utilise le cache d'acteurs populaires si disponible
  * @returns {Promise<Object|null>}
  */
 export async function getRandomActor() {
-    // Note: Ne pas cacher cette fonction car elle doit retourner un acteur différent à chaque appel
+    // Essayer d'abord avec le cache
+    const cache = await loadPopularActorsCache();
+    
+    if (cache && cache.length > 0) {
+        // Choisir un acteur aléatoire depuis le cache
+        const randomIndex = Math.floor(Math.random() * cache.length);
+        const actor = cache[randomIndex];
+        console.log(`🎬 Acteur depuis cache: ${actor.label}`);
+        return actor;
+    }
+
+    // Fallback: requête SPARQL si pas de cache
+    console.log('⚠️ Utilisation de la méthode SPARQL (plus lente)');
+    
     try {
-        // Requête SPARQL pour obtenir un acteur aléatoire
-        // On cherche des acteurs célèbres avec une photo
         const query = `
             SELECT ?actor ?actorLabel ?image WHERE {
                 # L'entité doit être un acteur
@@ -366,78 +417,124 @@ export async function getRandomActor() {
  * @returns {Promise<Object|null>} - {startActor, endActor, path}
  */
 export async function generateRandomChallenge(minLength = 3, maxLength = 8) {
-    try {
-        console.log('Génération d\'un défi aléatoire...');
-        
-        // 1. Choisir un acteur de départ aléatoire
-        const startActor = await getRandomActor();
-        if (!startActor) {
-            console.error('Impossible de récupérer un acteur de départ');
-            return null;
-        }
-        
-        console.log(`Acteur de départ: ${startActor.label}`);
-        
-        // 2. Déterminer la longueur du chemin aléatoire
-        const pathLength = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
-        console.log(`Longueur du chemin: ${pathLength} étapes`);
-        
-        // 3. Construire le chemin aléatoire
-        const path = [];
-        let currentActor = startActor;
-        
-        for (let i = 0; i < pathLength; i++) {
-            // Récupérer les films de l'acteur actuel
-            const films = await getActorFilms(currentActor.actor);
+    const MAX_RETRIES = 3; // Augmenté pour gérer les acteurs sans connexions
+    
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            console.log(`Génération d'un défi aléatoire (tentative ${attempt}/${MAX_RETRIES})...`);
             
-            if (!films || films.length === 0) {
-                console.error(`Aucun film trouvé pour ${currentActor.label}`);
-                return null;
+            // 1. Choisir un acteur de départ aléatoire
+            const startActor = await getRandomActor();
+            if (!startActor) {
+                console.error('Impossible de récupérer un acteur de départ');
+                continue;
             }
             
-            // Choisir un film aléatoire
-            const randomFilm = films[Math.floor(Math.random() * films.length)];
+            console.log(`Acteur de départ: ${startActor.label}`);
             
-            // Récupérer les co-acteurs de ce film
-            const coActors = await getFilmActors(randomFilm.movie, currentActor.actor);
+            // 2. Déterminer la longueur du chemin aléatoire
+            const pathLength = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
+            console.log(`Longueur du chemin: ${pathLength} étapes`);
             
-            if (!coActors || coActors.length === 0) {
-                console.error(`Aucun co-acteur trouvé dans ${randomFilm.title}`);
-                return null;
+            // 3. Construire le chemin aléatoire
+            const path = [];
+            let currentActor = startActor;
+            let pathCompleted = false;
+            
+            for (let i = 0; i < pathLength; i++) {
+                // Récupérer les films de l'acteur actuel
+                const films = await getActorFilms(currentActor.actor);
+                
+                if (!films || films.length === 0) {
+                    console.warn(`Aucun film trouvé pour ${currentActor.label} à l'étape ${i + 1}`);
+                    // Si on a au moins 3 étapes (minLength), on s'arrête là
+                    if (path.length >= minLength - 1) {
+                        console.log(`Arrêt du chemin à ${path.length + 1} étapes (minimum atteint)`);
+                        pathCompleted = true;
+                        break;
+                    } else if (i === 0) {
+                        // Si c'est l'acteur de départ qui pose problème, essayer un autre acteur
+                        console.warn(`L'acteur de départ ${startActor.label} n'a pas de films, essai d'un autre acteur...`);
+                        break; // Sort de la boucle for et continue avec une nouvelle tentative
+                    } else {
+                        // Sinon, on abandonne cette tentative
+                        console.error(`Chemin trop court (${path.length} étapes), recommencer`);
+                        break;
+                    }
+                }
+                
+                // Choisir un film aléatoire
+                const randomFilm = films[Math.floor(Math.random() * films.length)];
+                
+                // Récupérer les co-acteurs de ce film
+                const coActors = await getFilmActors(randomFilm.movie, currentActor.actor);
+                
+                if (!coActors || coActors.length === 0) {
+                    console.warn(`Aucun co-acteur trouvé dans ${randomFilm.title} à l'étape ${i + 1}`);
+                    // Si on a au moins 3 étapes (minLength), on s'arrête là
+                    if (path.length >= minLength - 1) {
+                        console.log(`Arrêt du chemin à ${path.length + 1} étapes (minimum atteint)`);
+                        pathCompleted = true;
+                        break;
+                    } else if (i === 0) {
+                        // Si c'est l'acteur de départ qui pose problème, essayer un autre acteur
+                        console.warn(`L'acteur de départ ${startActor.label} n'a pas de co-acteurs, essai d'un autre acteur...`);
+                        break; // Sort de la boucle for et continue avec une nouvelle tentative
+                    } else {
+                        // Sinon, on abandonne cette tentative
+                        console.error(`Chemin trop court (${path.length} étapes), recommencer`);
+                        break;
+                    }
+                }
+                
+                // Choisir un co-acteur aléatoire
+                const nextActor = coActors[Math.floor(Math.random() * coActors.length)];
+                
+                // Ajouter cette étape au chemin
+                path.push({
+                    currentActor: currentActor.actor,
+                    currentActorLabel: currentActor.label,
+                    film: randomFilm,
+                    nextActor: nextActor
+                });
+                
+                console.log(`Étape ${i + 1}: ${currentActor.label} -> ${randomFilm.title} -> ${nextActor.label}`);
+                
+                // Le prochain acteur devient l'acteur actuel
+                currentActor = nextActor;
+                
+                // Si on a atteint la longueur demandée
+                if (i === pathLength - 1) {
+                    pathCompleted = true;
+                }
             }
             
-            // Choisir un co-acteur aléatoire
-            const nextActor = coActors[Math.floor(Math.random() * coActors.length)];
+            // Vérifier si le chemin est valide
+            if (!pathCompleted || path.length < minLength - 1) {
+                console.warn(`Chemin invalide (${path.length} étapes), nouvelle tentative...`);
+                continue;
+            }
             
-            // Ajouter cette étape au chemin
-            path.push({
-                currentActor: currentActor.actor,
-                currentActorLabel: currentActor.label,
-                film: randomFilm,
-                nextActor: nextActor
-            });
+            // 4. Le dernier acteur du chemin est l'acteur cible
+            const endActor = currentActor;
             
-            console.log(`Étape ${i + 1}: ${currentActor.label} -> ${randomFilm.title} -> ${nextActor.label}`);
+            console.log(`Défi généré: ${startActor.label} -> ${endActor.label} (${path.length + 1} étapes)`);
             
-            // Le prochain acteur devient l'acteur actuel
-            currentActor = nextActor;
+            return {
+                startActor,
+                endActor,
+                path,
+                pathLength: path.length + 1
+            };
+        } catch (error) {
+            console.error(`Erreur lors de la tentative ${attempt}:`, error);
+            if (attempt === MAX_RETRIES) {
+                throw new Error('Impossible de générer un défi après plusieurs tentatives. Veuillez réessayer.');
+            }
         }
-        
-        // 4. Le dernier acteur du chemin est l'acteur cible
-        const endActor = currentActor;
-        
-        console.log(`Défi généré: ${startActor.label} -> ${endActor.label} (${pathLength} étapes)`);
-        
-        return {
-            startActor,
-            endActor,
-            path,
-            pathLength
-        };
-    } catch (error) {
-        console.error('Erreur génération défi aléatoire:', error);
-        return null;
     }
+    
+    return null;
 }
 
 /**
@@ -509,7 +606,8 @@ async function getFilmActors(movieUri, excludeActorUri) {
                     
                     ?actor wdt:P106 wd:Q33999 .
                     
-                    OPTIONAL { ?actor wdt:P18 ?image . }
+                    # Exiger une image (pas OPTIONAL)
+                    ?actor wdt:P18 ?image .
                     
                     SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
                 }
@@ -532,7 +630,7 @@ async function getFilmActors(movieUri, excludeActorUri) {
                 return {
                     actor: b.actor.value,
                     label: b.actorLabel.value,
-                    imageUrl: b.image ? b.image.value : null,
+                    imageUrl: b.image.value, // Toujours présent maintenant
                     wikidataUrl: `https://www.wikidata.org/wiki/${actorId}`
                 };
             });
@@ -554,8 +652,8 @@ export async function generatePathBetweenActors(startActor, targetActor, maxLeng
     try {
         console.log(`Génération d'un chemin de ${startActor.label} vers ${targetActor.label}...`);
         
-        // Déterminer une longueur aléatoire entre 2 et maxLength
-        const pathLength = Math.floor(Math.random() * (maxLength - 1)) + 2;
+        // Utiliser une longueur fixe plus courte pour être plus rapide
+        const pathLength = Math.min(4, maxLength); // Maximum 4 étapes pour la rapidité
         console.log(`Longueur du chemin: ${pathLength} étapes`);
         
         const path = [];
@@ -567,6 +665,10 @@ export async function generatePathBetweenActors(startActor, targetActor, maxLeng
             
             if (!films || films.length === 0) {
                 console.error(`Aucun film trouvé pour ${currentActor.label}`);
+                // Essayer avec un chemin plus court
+                if (pathLength > 2) {
+                    return await generatePathBetweenActors(startActor, targetActor, pathLength - 1);
+                }
                 return null;
             }
             
@@ -578,6 +680,26 @@ export async function generatePathBetweenActors(startActor, targetActor, maxLeng
             
             if (!coActors || coActors.length === 0) {
                 console.error(`Aucun co-acteur trouvé dans ${randomFilm.title}`);
+                // Essayer avec un autre film
+                if (films.length > 1) {
+                    const otherFilm = films[Math.floor(Math.random() * films.length)];
+                    const otherCoActors = await getFilmActors(otherFilm.movie, currentActor.actor);
+                    if (otherCoActors && otherCoActors.length > 0) {
+                        const nextActor = otherCoActors[Math.floor(Math.random() * otherCoActors.length)];
+                        path.push({
+                            currentActor: currentActor.actor,
+                            currentActorLabel: currentActor.label,
+                            film: otherFilm,
+                            nextActor: nextActor
+                        });
+                        currentActor = nextActor;
+                        continue;
+                    }
+                }
+                // Sinon essayer avec un chemin plus court
+                if (pathLength > 2) {
+                    return await generatePathBetweenActors(startActor, targetActor, pathLength - 1);
+                }
                 return null;
             }
             
@@ -627,4 +749,112 @@ export async function generatePathBetweenActors(startActor, targetActor, maxLeng
         console.error('Erreur génération chemin entre acteurs:', error);
         return null;
     }
+}
+
+/**
+ * Génère un chemin aléatoire depuis un acteur de départ spécifique
+ * L'acteur d'arrivée est découvert naturellement à la fin du chemin
+ * @param {Object} startActor - Acteur de départ {actor, label, imageUrl, wikidataUrl}
+ * @param {number} minLength - Longueur minimale du chemin (par défaut 3)
+ * @param {number} maxLength - Longueur maximale du chemin (par défaut 8)
+ * @returns {Promise<Object|null>} - {startActor, endActor, path}
+ */
+export async function generateRandomChallengeFromStart(startActor, minLength = 3, maxLength = 8) {
+    const MAX_RETRIES = 3;
+    
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            console.log(`Génération d'un chemin aléatoire depuis ${startActor.label} (tentative ${attempt}/${MAX_RETRIES})...`);
+            
+            // Déterminer la longueur du chemin aléatoire
+            const pathLength = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
+            console.log(`Longueur du chemin: ${pathLength} étapes`);
+            
+            // Construire le chemin aléatoire
+            const path = [];
+            let currentActor = startActor;
+            let pathCompleted = false;
+            
+            for (let i = 0; i < pathLength; i++) {
+                // Récupérer les films de l'acteur actuel
+                const films = await getActorFilms(currentActor.actor);
+                
+                if (!films || films.length === 0) {
+                    console.warn(`Aucun film trouvé pour ${currentActor.label} à l'étape ${i + 1}`);
+                    if (path.length >= minLength - 1) {
+                        console.log(`Arrêt du chemin à ${path.length + 1} étapes (minimum atteint)`);
+                        pathCompleted = true;
+                        break;
+                    } else {
+                        console.error(`Chemin trop court (${path.length} étapes), recommencer`);
+                        break;
+                    }
+                }
+                
+                // Choisir un film aléatoire
+                const randomFilm = films[Math.floor(Math.random() * films.length)];
+                
+                // Récupérer les co-acteurs de ce film
+                const coActors = await getFilmActors(randomFilm.movie, currentActor.actor);
+                
+                if (!coActors || coActors.length === 0) {
+                    console.warn(`Aucun co-acteur trouvé dans ${randomFilm.title} à l'étape ${i + 1}`);
+                    if (path.length >= minLength - 1) {
+                        console.log(`Arrêt du chemin à ${path.length + 1} étapes (minimum atteint)`);
+                        pathCompleted = true;
+                        break;
+                    } else {
+                        console.error(`Chemin trop court (${path.length} étapes), recommencer`);
+                        break;
+                    }
+                }
+                
+                // Choisir un co-acteur aléatoire
+                const nextActor = coActors[Math.floor(Math.random() * coActors.length)];
+                
+                // Ajouter cette étape au chemin
+                path.push({
+                    currentActor: currentActor.actor,
+                    currentActorLabel: currentActor.label,
+                    film: randomFilm,
+                    nextActor: nextActor
+                });
+                
+                console.log(`Étape ${i + 1}: ${currentActor.label} -> ${randomFilm.title} -> ${nextActor.label}`);
+                
+                // Le prochain acteur devient l'acteur actuel
+                currentActor = nextActor;
+                
+                // Si on a atteint la longueur demandée
+                if (i === pathLength - 1) {
+                    pathCompleted = true;
+                }
+            }
+            
+            // Vérifier si le chemin est valide
+            if (!pathCompleted || path.length < minLength - 1) {
+                console.warn(`Chemin invalide (${path.length} étapes), nouvelle tentative...`);
+                continue;
+            }
+            
+            // Le dernier acteur du chemin est l'acteur d'arrivée découvert
+            const endActor = currentActor;
+            
+            console.log(`Chemin généré: ${startActor.label} -> ${endActor.label} (${path.length + 1} étapes)`);
+            
+            return {
+                startActor,
+                endActor,
+                path,
+                pathLength: path.length + 1
+            };
+        } catch (error) {
+            console.error(`Erreur lors de la tentative ${attempt}:`, error);
+            if (attempt === MAX_RETRIES) {
+                throw new Error('Impossible de générer un chemin depuis cet acteur. Veuillez réessayer.');
+            }
+        }
+    }
+    
+    return null;
 }
