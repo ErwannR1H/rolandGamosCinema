@@ -212,7 +212,7 @@ async function getMovieDetails(movieId) {
             SELECT ?movieLabel ?poster WHERE {
                 BIND(wd:${movieId} AS ?movie)
                 OPTIONAL { ?movie wdt:P18 ?poster . }
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
+                SERVICE wikibase:label { bd:serviceParam wikibase:language "fr,en". }
             }
         `;
         

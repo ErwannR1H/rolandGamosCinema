@@ -259,7 +259,8 @@ function Game() {
     scores: { player1: 0, player2: 0 },
     actorsHistory: [],
     lastActor: null,
-    isGameActive: false
+    isGameActive: false,
+    eliminatedPlayers: [] // Liste des joueurs éliminés
   });
 
   const [actorInput, setActorInput] = useState('');
@@ -287,7 +288,8 @@ function Game() {
       scores: initialScores,
       actorsHistory: [],
       lastActor: null,
-      isGameActive: true
+      isGameActive: true,
+      eliminatedPlayers: []
     });
     setActorInput('');
     clearMessages();
@@ -299,14 +301,49 @@ function Game() {
     addMessage(`Fin de partie ! Le Joueur ${winner} remporte la victoire !`, 'success');
   };
 
+  const eliminatePlayer = (playerNumber) => {
+    // Calculer les joueurs actifs restants
+    const newEliminatedPlayers = [...gameState.eliminatedPlayers, playerNumber];
+    const activePlayers = [];
+    for (let i = 1; i <= playerCount; i++) {
+      if (!newEliminatedPlayers.includes(i)) {
+        activePlayers.push(i);
+      }
+    }
+
+    // Si un seul joueur reste, il gagne
+    if (activePlayers.length === 1) {
+      setGameState(prev => ({ ...prev, eliminatedPlayers: newEliminatedPlayers }));
+      setTimeout(() => {
+        endGame(activePlayers[0]);
+      }, 100);
+      return;
+    }
+
+    // Calculer le prochain joueur actif
+    let nextPlayer = playerNumber >= playerCount ? 1 : playerNumber + 1;
+    while (newEliminatedPlayers.includes(nextPlayer)) {
+      nextPlayer = nextPlayer >= playerCount ? 1 : nextPlayer + 1;
+    }
+
+    setGameState(prev => ({
+      ...prev,
+      eliminatedPlayers: newEliminatedPlayers,
+      currentPlayer: nextPlayer
+    }));
+  };
+
   const acceptActor = (actor) => {
     setGameState(prev => {
       const newScores = { ...prev.scores };
       const scoreKey = `player${prev.currentPlayer}`;
       newScores[scoreKey]++;
 
-      // Calculer le prochain joueur (avec rotation)
-      const nextPlayer = prev.currentPlayer >= playerCount ? 1 : prev.currentPlayer + 1;
+      // Calculer le prochain joueur actif (en sautant les éliminés)
+      let nextPlayer = prev.currentPlayer >= playerCount ? 1 : prev.currentPlayer + 1;
+      while (prev.eliminatedPlayers.includes(nextPlayer)) {
+        nextPlayer = nextPlayer >= playerCount ? 1 : nextPlayer + 1;
+      }
 
       return {
         ...prev,
@@ -349,21 +386,10 @@ function Game() {
       const alreadyUsed = gameState.actorsHistory.some(a => a.actor === actor.actor);
       if (alreadyUsed) {
         addMessage(
-          `Cet acteur (${actor.label}) a déjà été mentionné ! Le Joueur ${gameState.currentPlayer} perd.`, 
+          `Cet acteur (${actor.label}) a déjà été mentionné ! Le Joueur ${gameState.currentPlayer} est éliminé.`, 
           'error'
         );
-        
-        // Déterminer le gagnant (tous les autres joueurs sauf celui qui a perdu)
-        const winners = [];
-        for (let i = 1; i <= playerCount; i++) {
-          if (i !== gameState.currentPlayer) {
-            winners.push(i);
-          }
-        }
-        const winnerText = winners.length > 1 
-          ? `Les Joueurs ${winners.join(', ')} gagnent` 
-          : `Le Joueur ${winners[0]} gagne`;
-        endGame(winnerText);
+        eliminatePlayer(gameState.currentPlayer);
         setIsLoading(false);
         return;
       }
@@ -380,21 +406,10 @@ function Game() {
 
       if (!commonMovie) {
         addMessage(
-          `Aucun film commun trouvé entre ${gameState.lastActor.label} et ${actor.label}. Le Joueur ${gameState.currentPlayer} perd.`,
+          `Aucun film commun trouvé entre ${gameState.lastActor.label} et ${actor.label}. Le Joueur ${gameState.currentPlayer} est éliminé.`,
           'error'
         );
-        
-        // Déterminer le gagnant (tous les autres joueurs sauf celui qui a perdu)
-        const winners = [];
-        for (let i = 1; i <= playerCount; i++) {
-          if (i !== gameState.currentPlayer) {
-            winners.push(i);
-          }
-        }
-        const winnerText = winners.length > 1 
-          ? `Les Joueurs ${winners.join(', ')} gagnent` 
-          : `Le Joueur ${winners[0]} gagne`;
-        endGame(winnerText);
+        eliminatePlayer(gameState.currentPlayer);
         setIsLoading(false);
         return;
       }
@@ -420,19 +435,8 @@ function Game() {
       return;
     }
 
-    // Déterminer le gagnant (tous les autres joueurs sauf celui qui abandonne)
-    const winners = [];
-    for (let i = 1; i <= playerCount; i++) {
-      if (i !== gameState.currentPlayer) {
-        winners.push(i);
-      }
-    }
-    const winnerText = winners.length > 1 
-      ? `Les Joueurs ${winners.join(', ')} gagnent` 
-      : `Le Joueur ${winners[0]} gagne`;
-    
-    addMessage(`Le Joueur ${gameState.currentPlayer} abandonne. ${winnerText} !`, 'info');
-    endGame(winnerText);
+    addMessage(`Le Joueur ${gameState.currentPlayer} abandonne et est éliminé.`, 'info');
+    eliminatePlayer(gameState.currentPlayer);
   };
 
   const buttonStyle = (isPrimary) => {
@@ -524,6 +528,21 @@ function Game() {
                 scores={gameState.scores}
                 isGameActive={gameState.isGameActive}
               />
+
+              {gameState.eliminatedPlayers.length > 0 && (
+                <div style={{
+                  background: '#f8d7da',
+                  border: '2px solid #f5c6cb',
+                  borderRadius: '10px',
+                  padding: '15px',
+                  marginBottom: '20px',
+                  textAlign: 'center'
+                }}>
+                  <p style={{ color: '#721c24', margin: 0, fontWeight: '600' }}>
+                    ❌ Joueurs éliminés : {gameState.eliminatedPlayers.map(p => `Joueur ${p}`).join(', ')}
+                  </p>
+                </div>
+              )}
 
               <LastActor lastActor={gameState.lastActor} />
 
