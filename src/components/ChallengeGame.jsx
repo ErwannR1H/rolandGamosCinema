@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { findActor, haveCommonMovie } from '../services/sparqlService';
 import { getRandomActor, generateRandomChallenge, generatePathBetweenActors } from '../services/wikidataService';
-import Loading from './Loading';
 
-function ChallengeGame({ config }) {
+function ChallengeGame({ config, onReset }) {
   const navigate = useNavigate();
   const [startActor, setStartActor] = useState(null);
   const [endActor, setEndActor] = useState(null);
@@ -606,7 +605,7 @@ function ChallengeGame({ config }) {
           }}>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
               <button
-                onClick={() => navigate('/defi')}
+                onClick={onReset}
                 style={{
                   padding: '15px 30px',
                   border: 'none',

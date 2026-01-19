@@ -620,11 +620,15 @@ function ChallengeMode() {
     setConfig(challengeConfig);
   };
 
+  const resetChallenge = () => {
+    setConfig(null);
+  };
+
   if (!config) {
     return <ChallengeSetup onStartChallenge={handleStartChallenge} />;
   }
 
-  return <ChallengeGame config={config} />;
+  return <ChallengeGame config={config} onReset={resetChallenge} />;
 }
 
 // Composant principal qui gère la navigation
