@@ -9,10 +9,13 @@ const WIKIDATA_SPARQL_ENDPOINT = 'https://query.wikidata.org/sparql';
  * Trouve un acteur valide qui partage un film avec le dernier acteur
  * @param {string} lastActorUri - URI Wikidata du dernier acteur
  * @param {Array<string>} excludedActorUris - Liste des URIs d'acteurs déjà utilisés
+ * @param {Object} options
+ * @param {'normal'|'easy'} [options.mode='normal'] - Mode de sélection IA
  * @returns {Promise<Object|null>} - Acteur trouvé avec film commun ou null
  */
-export async function findValidActorResponse(lastActorUri, excludedActorUris = []) {
+export async function findValidActorResponse(lastActorUri, excludedActorUris = [], options = {}) {
     try {
+        const { mode = 'normal' } = options;
         const lastActorId = lastActorUri.split('/').pop();
 
         // Construire le filtre pour exclure les acteurs déjà utilisés
@@ -83,9 +86,20 @@ export async function findValidActorResponse(lastActorUri, excludedActorUris = [
             return null;
         }
 
-        // Choisir un acteur au hasard parmi les résultats
-        const randomIndex = Math.floor(Math.random() * results.length);
-        const chosen = results[randomIndex];
+        let pool = results;
+
+        if (mode === 'easy') {
+            const sortedByPopularity = [...results].sort((a, b) => {
+                const aLinks = Number(a.sitelinks?.value || 0);
+                const bLinks = Number(b.sitelinks?.value || 0);
+                return bLinks - aLinks;
+            });
+            const topCandidates = sortedByPopularity.slice(0, 3);
+            pool = topCandidates.length > 0 ? topCandidates : results;
+        }
+
+        const randomIndex = Math.floor(Math.random() * pool.length);
+        const chosen = pool[randomIndex];
 
         console.log(`🤖 IA choisit: ${chosen.coActorLabel.value} (via ${chosen.movieLabel.value})`);
 

@@ -22,6 +22,7 @@ function SoloGame() {
     const [hintsRemaining, setHintsRemaining] = useState(3);
     const [isLoadingHints, setIsLoadingHints] = useState(false);
     const [gameOverReason, setGameOverReason] = useState('');
+    const [aiMode, setAiMode] = useState('normal'); // 'normal' | 'easy'
 
     useEffect(() => {
         setHighScore(getHighScore());
@@ -166,7 +167,7 @@ function SoloGame() {
             const excludedUris = gameState.actorsHistory.map(a => a.actor);
             excludedUris.push(lastPlayerActor.actor);
 
-            const aiResponse = await findValidActorResponse(lastPlayerActor.actor, excludedUris);
+            const aiResponse = await findValidActorResponse(lastPlayerActor.actor, excludedUris, { mode: aiMode });
 
             if (!aiResponse) {
                 // L'IA n'a pas trouvé de réponse - le joueur gagne !
@@ -337,6 +338,31 @@ function SoloGame() {
                 {message.text && (
                     <div style={messageStyle}>{message.text}</div>
                 )}
+
+                {/* Mode IA */}
+                <div style={{
+                    margin: '0 0 20px 0',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    alignItems: 'center'
+                }}>
+                    <span style={{ color: '#555', fontWeight: 600 }}>Mode IA :</span>
+                    <select
+                        value={aiMode}
+                        onChange={(e) => setAiMode(e.target.value)}
+                        style={{
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '2px solid #11998e',
+                            minWidth: '180px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <option value="normal">Normal </option>
+                        <option value="easy">Facile </option>
+                    </select>
+                </div>
 
                 {/* Game Area */}
                 {gameState.status === 'playing' && (
