@@ -417,7 +417,7 @@ export async function getRandomActor() {
  * @returns {Promise<Object|null>} - {startActor, endActor, path}
  */
 export async function generateRandomChallenge(minLength = 3, maxLength = 8) {
-    const MAX_RETRIES = 3; // Augmenté pour gérer les acteurs sans connexions
+    const MAX_RETRIES = 3; 
     
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
@@ -540,11 +540,12 @@ export async function generateRandomChallenge(minLength = 3, maxLength = 8) {
 /**
  * Récupère tous les films dans lesquels un acteur a joué (avec détails)
  * @param {string} actorUri - URI de l'acteur
+ * @param {number} limit - Nombre maximum de films à retourner (par défaut 50)
  * @returns {Promise<Array>}
  */
-async function getActorFilms(actorUri) {
+export async function getActorFilms(actorUri, limit = 50) {
     const actorId = actorUri.split('/').pop();
-    const cacheKey = `actor_films_details:${actorId}`;
+    const cacheKey = `actor_films_details:${actorId}:${limit}`;
     
     return await getCachedOrFetch(cacheKey, async () => {
         try {
@@ -560,7 +561,7 @@ async function getActorFilms(actorUri) {
                     
                     SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr". }
                 }
-                LIMIT 50
+                LIMIT ${limit}
             `;
             
             const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
