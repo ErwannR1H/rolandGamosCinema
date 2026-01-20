@@ -10,6 +10,7 @@ import ChallengeSetup from './components/ChallengeSetup';
 import ChallengeGame from './components/ChallengeGame';
 import NetworkAnalysis from './components/NetworkAnalysis';
 import SoloGame from './components/SoloGame';
+import About from './components/About';
 import { findActor, haveCommonMovie } from './services/sparqlService';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
@@ -674,6 +675,9 @@ function App() {
         
         {/* Analyse du réseau d'acteurs */}
         <Route path="/analysis" element={<NetworkAnalysis />} />
+
+        {/* Page À propos */}
+        <Route path="/about" element={<About />} />
       </Routes>
     </Router>
   );
