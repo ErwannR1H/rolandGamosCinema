@@ -631,7 +631,7 @@ async function getFilmActors(movieUri, excludeActorUri) {
                 return {
                     actor: b.actor.value,
                     label: b.actorLabel.value,
-                    imageUrl: b.image.value, // Toujours présent maintenant
+                    imageUrl: b.image.value,
                     wikidataUrl: `https://www.wikidata.org/wiki/${actorId}`
                 };
             });
