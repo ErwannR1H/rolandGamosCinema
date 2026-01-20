@@ -1,4 +1,4 @@
-import { improveActorNameForDBpedia } from '../ollamaService';
+import { improveActorNameForWikiData } from '../ollamaService';
 
 // Mock global fetch
 global.fetch = jest.fn();
@@ -14,7 +14,7 @@ describe('ollamaService', () => {
         jest.restoreAllMocks();
     });
 
-    describe('improveActorNameForDBpedia', () => {
+    describe('improveActorNameForWikiData', () => {
         test('devrait corriger un nom d\'acteur mal orthographié', async () => {
             fetch.mockResolvedValueOnce({
                 ok: true,
@@ -29,7 +29,7 @@ describe('ollamaService', () => {
                 })
             });
 
-            const result = await improveActorNameForDBpedia('tom hank');
+            const result = await improveActorNameForWikiData('tom hank');
 
             expect(result).toBe('Tom Hanks');
             expect(fetch).toHaveBeenCalledTimes(1);
@@ -56,7 +56,7 @@ describe('ollamaService', () => {
                 })
             });
 
-            const result = await improveActorNameForDBpedia('leonardo di caprio');
+            const result = await improveActorNameForWikiData('leonardo di caprio');
 
             expect(result).toBe('Leonardo DiCaprio');
         });
@@ -75,7 +75,7 @@ describe('ollamaService', () => {
                 })
             });
 
-            const result = await improveActorNameForDBpedia('brad pit');
+            const result = await improveActorNameForWikiData('brad pit');
 
             expect(result).toBe('Brad Pitt');
         });
@@ -83,7 +83,7 @@ describe('ollamaService', () => {
         test('devrait retourner le nom original si erreur réseau', async () => {
             fetch.mockRejectedValueOnce(new Error('Network error'));
 
-            const result = await improveActorNameForDBpedia('Tom Hanks');
+            const result = await improveActorNameForWikiData('Tom Hanks');
 
             expect(result).toBe('Tom Hanks');
             expect(console.error).toHaveBeenCalled();
@@ -95,7 +95,7 @@ describe('ollamaService', () => {
                 status: 500
             });
 
-            const result = await improveActorNameForDBpedia('Tom Hanks');
+            const result = await improveActorNameForWikiData('Tom Hanks');
 
             expect(result).toBe('Tom Hanks');
             expect(console.error).toHaveBeenCalled();
@@ -109,7 +109,7 @@ describe('ollamaService', () => {
                 })
             });
 
-            await improveActorNameForDBpedia('test');
+            await improveActorNameForWikiData('test');
 
             const callArgs = fetch.mock.calls[0];
             const headers = callArgs[1].headers;
@@ -126,7 +126,7 @@ describe('ollamaService', () => {
                 })
             });
 
-            await improveActorNameForDBpedia('test');
+            await improveActorNameForWikiData('test');
 
             const callArgs = fetch.mock.calls[0];
             const body = JSON.parse(callArgs[1].body);
@@ -148,7 +148,7 @@ describe('ollamaService', () => {
                 })
             });
 
-            const result = await improveActorNameForDBpedia('test');
+            const result = await improveActorNameForWikiData('test');
 
             expect(result).toBe('');
         });

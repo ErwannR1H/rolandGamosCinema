@@ -3,7 +3,7 @@
  * DBpedia est conservé dans dbPediaService.js pour usage futur
  */
 
-import { improveActorNameForDBpedia } from './ollamaService.js';
+import { improveActorNameForWikiData } from './ollamaService.js';
 import { findActorOnWikidata, findCommonMovieOnWikidata } from './wikidataService.js';
 
 /**
@@ -25,7 +25,7 @@ export async function findActor(actorName) {
     console.log(`Pas trouvé directement, utilisation de l'IA...`);
     
     try {
-        const improvedName = await improveActorNameForDBpedia(actorName);
+        const improvedName = await improveActorNameForWikiData(actorName);
         
         console.log(`IA suggère: "${improvedName}"`);
         

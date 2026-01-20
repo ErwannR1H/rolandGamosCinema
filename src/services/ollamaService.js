@@ -10,7 +10,7 @@ const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI5YmM3ZDQ5LWM3NT
  * @param {string} actorName - Nom brut saisi par l'utilisateur
  * @returns {Promise<string>} - Nom formaté pour Wikidata
  */
-export async function improveActorNameForDBpedia(actorName) {
+export async function improveActorNameForWikiData(actorName) {
     try {
         const response = await fetch(OLLAMA_API_URL, {
             method: 'POST',

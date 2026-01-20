@@ -37,7 +37,7 @@ describe('sparqlService', () => {
                 source: 'Wikidata'
             });
             expect(wikidataService.findActorOnWikidata).toHaveBeenCalledWith('Tom Hanks');
-            expect(ollamaService.improveActorNameForDBpedia).not.toHaveBeenCalled();
+            expect(ollamaService.improveActorNameForWikiData).not.toHaveBeenCalled();
         });
 
         test('devrait utiliser l\'IA si l\'acteur n\'est pas trouvé directement', async () => {
@@ -53,7 +53,7 @@ describe('sparqlService', () => {
             wikidataService.findActorOnWikidata.mockResolvedValueOnce(null);
             
             // L'IA corrige le nom
-            ollamaService.improveActorNameForDBpedia.mockResolvedValueOnce('Tom Hanks');
+            ollamaService.improveActorNameForWikiData.mockResolvedValueOnce('Tom Hanks');
             
             // Deuxième recherche réussit avec le nom corrigé
             wikidataService.findActorOnWikidata.mockResolvedValueOnce(mockActor);
@@ -65,12 +65,12 @@ describe('sparqlService', () => {
                 source: 'Wikidata'
             });
             expect(wikidataService.findActorOnWikidata).toHaveBeenCalledTimes(2);
-            expect(ollamaService.improveActorNameForDBpedia).toHaveBeenCalledWith('tom hank');
+            expect(ollamaService.improveActorNameForWikiData).toHaveBeenCalledWith('tom hank');
         });
 
         test('devrait retourner null si l\'IA retourne le même nom', async () => {
             wikidataService.findActorOnWikidata.mockResolvedValueOnce(null);
-            ollamaService.improveActorNameForDBpedia.mockResolvedValueOnce('test');
+            ollamaService.improveActorNameForWikiData.mockResolvedValueOnce('test');
 
             const result = await findActor('test');
 
@@ -80,7 +80,7 @@ describe('sparqlService', () => {
 
         test('devrait retourner null si l\'IA retourne un nom vide', async () => {
             wikidataService.findActorOnWikidata.mockResolvedValueOnce(null);
-            ollamaService.improveActorNameForDBpedia.mockResolvedValueOnce('');
+            ollamaService.improveActorNameForWikiData.mockResolvedValueOnce('');
 
             const result = await findActor('acteur inconnu');
 
@@ -89,7 +89,7 @@ describe('sparqlService', () => {
 
         test('devrait gérer les erreurs de l\'IA gracieusement', async () => {
             wikidataService.findActorOnWikidata.mockResolvedValueOnce(null);
-            ollamaService.improveActorNameForDBpedia.mockRejectedValueOnce(new Error('API error'));
+            ollamaService.improveActorNameForWikiData.mockRejectedValueOnce(new Error('API error'));
 
             const result = await findActor('test');
 
@@ -102,7 +102,7 @@ describe('sparqlService', () => {
             wikidataService.findActorOnWikidata.mockResolvedValueOnce(null);
             
             // L'IA suggère un nom différent
-            ollamaService.improveActorNameForDBpedia.mockResolvedValueOnce('Unknown Actor');
+            ollamaService.improveActorNameForWikiData.mockResolvedValueOnce('Unknown Actor');
             
             // Deuxième recherche échoue aussi
             wikidataService.findActorOnWikidata.mockResolvedValueOnce(null);
