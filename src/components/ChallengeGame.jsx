@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { findActor, haveCommonMovie } from '../services/sparqlService';
-import { getRandomActor, generateRandomChallenge, generatePathBetweenActors, generateRandomChallengeFromStart } from '../services/wikidataService';
+import { getRandomActor, generateRandomChallenge, generatePathBetweenActors, generateRandomChallengeFromStart, getActorFilms } from '../services/wikidataService';
 
 function ChallengeGame({ config, onReset }) {
   const navigate = useNavigate();
@@ -212,71 +212,28 @@ function ChallengeGame({ config, onReset }) {
   const handleHint = async () => {
     if (gameOver || isLoading) return;
     
-    // Vérifier si on a un chemin solution
-    if (!solutionPath || solutionPath.length === 0) {
-      setHintMessage('❌ Aucun indice disponible');
-      return;
-    }
-    
     setIsLoading(true);
     const newHintsUsed = hintsUsed + 1;
     setHintsUsed(newHintsUsed);
     
     try {
-      // Trouver où nous sommes dans le chemin
+      // Obtenir l'acteur actuel dans le chemin
       const currentPosition = path.length - 1;
-      const currentActorUri = path[currentPosition].actor;
+      const currentActor = path[currentPosition];
       
-      // Trouver si l'acteur actuel est dans le chemin solution original
-      let nextStepIndex = -1;
-      for (let i = 0; i < solutionPath.length; i++) {
-        if (solutionPath[i].currentActor === currentActorUri) {
-          nextStepIndex = i;
-          break;
-        }
+      // Récupérer les films de l'acteur actuel
+      const films = await getActorFilms(currentActor.actor, 5);
+      
+      if (!films || films.length === 0) {
+        setHintMessage(`💡 Indice ${newHintsUsed}: Impossible de récupérer les films de ${currentActor.label}`);
+        setIsLoading(false);
+        return;
       }
       
-      if (nextStepIndex !== -1) {
-        // Le joueur est sur le chemin optimal original !
-        const nextStep = solutionPath[nextStepIndex];
-        
-        if (newHintsUsed % 2 === 1) {
-          // Premier indice: donner un film
-          setHintMessage(`💡 Indice ${newHintsUsed}: Cherchez un acteur ayant joué dans "${nextStep.film.title}"`);
-        } else {
-          // Deuxième indice: donner l'acteur
-          setHintMessage(`💡 Indice ${newHintsUsed}: Le prochain acteur est ${nextStep.nextActor.label}`);
-        }
-        setIsLoading(false);
-      } else {
-        // Le joueur a dévié du chemin original
-        // On génère un nouveau chemin depuis sa position actuelle vers l'acteur cible
-        setHintMessage(`🔍 Calcul d'un nouveau chemin depuis votre position...`);
-        
-        const currentActor = path[currentPosition];
-        const newPath = await generatePathBetweenActors(currentActor, endActor, 4);
-        
-        if (!newPath || newPath.length === 0) {
-          setHintMessage(`💡 Indice ${newHintsUsed}: Continuez à explorer, vous trouverez un chemin vers ${endActor.label}`);
-          setIsLoading(false);
-          return;
-        }
-        
-        // Mettre à jour le chemin solution avec le nouveau chemin
-        setSolutionPath(newPath);
-        console.log(`Nouveau chemin calculé (${newPath.length} étapes):`, 
-          newPath.map(step => `${step.currentActorLabel} -> ${step.film.title} -> ${step.nextActor.label}`));
-        
-        // Donner l'indice basé sur ce nouveau chemin
-        const firstStep = newPath[0];
-        
-        if (newHintsUsed % 2 === 1) {
-          setHintMessage(`💡 Indice ${newHintsUsed}: Nouveau chemin calculé ! Cherchez un acteur ayant joué dans "${firstStep.film.title}"`);
-        } else {
-          setHintMessage(`💡 Indice ${newHintsUsed}: Le prochain acteur est ${firstStep.nextActor.label}`);
-        }
-        setIsLoading(false);
-      }
+      // Afficher les films de l'acteur actuel
+      const filmsList = films.map(f => f.title).join(', ');
+      setHintMessage(`💡 Indice ${newHintsUsed}: ${currentActor.label} a joué dans : ${filmsList}`);
+      setIsLoading(false);
     } catch (error) {
       console.error('Erreur lors de la recherche d\'indice:', error);
       setHintMessage(`💡 Indice ${newHintsUsed}: Continuez vers ${endActor.label}, vous êtes sur la bonne voie !`);
@@ -581,18 +538,18 @@ function ChallengeGame({ config, onReset }) {
                 <button
                   type="button"
                   onClick={handleHint}
-                  disabled={isLoading || !solutionPath}
+                  disabled={isLoading}
                   style={{
                     padding: '15px 30px',
                     border: 'none',
                     borderRadius: '10px',
-                    background: !solutionPath ? '#ccc' : '#ffc107',
-                    color: !solutionPath ? '#666' : '#000',
+                    background: '#ffc107',
+                    color: '#000',
                     fontSize: '1.1em',
-                    cursor: isLoading || !solutionPath ? 'not-allowed' : 'pointer',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
                     fontWeight: '600'
                   }}
-                  title={!solutionPath ? "Indices disponibles uniquement en mode aléatoire" : "Obtenez un indice (film ou acteur)"}
+                  title="Voir les films de l'acteur actuel"
                 >
                    Indice
                 </button>
