@@ -35,6 +35,9 @@ export async function findValidActorResponse(lastActorUri, excludedActorUris = [
                 # Vérifier que c'est un acteur
                 ?coActor wdt:P106 ?occupation .
                 FILTER(?occupation IN (wd:Q33999, wd:Q10800557, wd:Q10798782))
+
+                # Exclure les réalisateurs pour éviter les faux positifs (caméos, multi-rôles)
+                FILTER NOT EXISTS { ?coActor wdt:P106 wd:Q2526255 }
                 
                 # Exclure le dernier acteur lui-même
                 FILTER(?coActor != wd:${lastActorId})
@@ -126,6 +129,8 @@ export async function getHints(lastActorUri, excludedActorUris = []) {
                 
                 ?coActor wdt:P106 ?occupation .
                 FILTER(?occupation IN (wd:Q33999, wd:Q10800557, wd:Q10798782))
+
+                FILTER NOT EXISTS { ?coActor wdt:P106 wd:Q2526255 }
                 
                 FILTER(?coActor != wd:${lastActorId})
                 ${excludeClause}
