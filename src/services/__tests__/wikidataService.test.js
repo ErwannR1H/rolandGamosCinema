@@ -30,14 +30,14 @@ describe('wikidataService', () => {
                 })
             });
 
-            // Mock de la vérification avec popularité
+            // Mock de la vérification batch avec popularité et tri (retourne 1 seul résultat)
             fetch.mockResolvedValueOnce({
                 ok: true,
                 json: async () => ({
                     results: {
                         bindings: [
                             {
-                                isActor: { value: 'true' },
+                                entity: { value: 'http://www.wikidata.org/entity/Q123' },
                                 sitelinks: { value: '150' },
                                 image: { value: 'https://example.com/image.jpg' }
                             }
@@ -57,7 +57,7 @@ describe('wikidataService', () => {
                 popularity: 150
             });
 
-            // Vérifier que fetch a été appelé 2 fois (recherche + vérification)
+            // Vérifier que fetch a été appelé 2 fois (recherche + vérification batch)
             expect(fetch).toHaveBeenCalledTimes(2);
         });
 
@@ -88,17 +88,12 @@ describe('wikidataService', () => {
                 })
             });
 
-            // Mock de la vérification - ce n'est pas un acteur
+            // Mock de la vérification - aucun acteur trouvé
             fetch.mockResolvedValueOnce({
                 ok: true,
                 json: async () => ({
                     results: {
-                        bindings: [
-                            {
-                                isActor: { value: 'false' },
-                                sitelinks: { value: '200' }
-                            }
-                        ]
+                        bindings: []
                     }
                 })
             });
