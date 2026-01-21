@@ -9,7 +9,8 @@ const WIKIDATA_SEARCH_API = 'https://www.wikidata.org/w/api.php';
 const WIKIDATA_SPARQL_ENDPOINT = 'https://query.wikidata.org/sparql';
 
 /**
- * Recherche un acteur sur Wikidata en utilisant l'API de recherche
+ * Recherche un acteur sur Wikidata avec tri par popularité
+ * Utilise l'API de recherche puis vérifie tous les résultats avec leur popularité
  * @param {string} actorName - Nom de l'acteur à rechercher
  * @returns {Promise<Object|null>}
  */
@@ -18,7 +19,7 @@ export async function findActorOnWikidata(actorName) {
     
     return await getCachedOrFetch(cacheKey, async () => {
         try {
-            // Étape 1: Rechercher l'acteur via l'API de recherche Wikidata
+            // Étape 1: Rechercher l'acteur via l'API de recherche Wikidata (rapide)
             const searchUrl = `${WIKIDATA_SEARCH_API}?` + new URLSearchParams({
                 action: 'wbsearchentities',
                 search: actorName,
@@ -40,28 +41,42 @@ export async function findActorOnWikidata(actorName) {
                 return null;
             }
 
-            // Étape 2: Vérifier que les résultats sont des acteurs
-            for (const result of searchData.search) {
-                const entityId = result.id;
-                
-                // Vérifier si c'est un acteur via SPARQL
-                const isActor = await checkIfActor(entityId);
-                
-                if (isActor) {
-                    // Récupérer l'image de l'acteur si disponible
-                    const imageUrl = await getActorImage(entityId);
-                    
+            // Étape 2: Vérifier tous les résultats en parallèle avec leur popularité
+            const actorChecks = await Promise.all(
+                searchData.search.map(async (result) => {
+                    const check = await checkIfActorWithPopularity(result.id);
                     return {
-                        actor: `http://www.wikidata.org/entity/${entityId}`,
-                        label: result.label,
-                        description: result.description || '',
-                        wikidataUrl: `https://www.wikidata.org/wiki/${entityId}`,
-                        imageUrl: imageUrl
+                        ...result,
+                        isActor: check.isActor,
+                        popularity: check.popularity,
+                        imageUrl: check.imageUrl
                     };
-                }
+                })
+            );
+
+            // Étape 3: Filtrer les acteurs et trier par popularité
+            const actors = actorChecks
+                .filter(r => r.isActor)
+                .sort((a, b) => b.popularity - a.popularity);
+            
+            if (actors.length === 0) {
+                console.log(`Aucun acteur trouvé pour "${actorName}"`);
+                return null;
             }
 
-            return null;
+            // Prendre le plus populaire
+            const bestMatch = actors[0];
+            console.log(`Acteur trouvé: ${bestMatch.label} (${bestMatch.id}) - ${bestMatch.popularity} sitelinks`);
+            
+            return {
+                actor: `http://www.wikidata.org/entity/${bestMatch.id}`,
+                label: bestMatch.label,
+                description: bestMatch.description || '',
+                wikidataUrl: `https://www.wikidata.org/wiki/${bestMatch.id}`,
+                imageUrl: bestMatch.imageUrl,
+                popularity: bestMatch.popularity
+            };
+
         } catch (error) {
             console.error('Erreur recherche acteur Wikidata:', error);
             throw error;
@@ -70,25 +85,34 @@ export async function findActorOnWikidata(actorName) {
 }
 
 /**
- * Vérifie si une entité Wikidata est un acteur
+ * Vérifie si une entité Wikidata est un acteur et récupère sa popularité + image
  * @param {string} entityId - ID de l'entité Wikidata (ex: Q123)
- * @returns {Promise<boolean>}
+ * @returns {Promise<{isActor: boolean, popularity: number, imageUrl: string|null}>}
  */
-async function checkIfActor(entityId) {
-    const cacheKey = `check_actor:${entityId}`;
+async function checkIfActorWithPopularity(entityId) {
+    const cacheKey = `check_actor_pop:${entityId}`;
     
     return await getCachedOrFetch(cacheKey, async () => {
         const query = `
-            ASK {
-                {
-                    wd:${entityId} wdt:P106 wd:Q33999 .  # acteur/actrice
-                } UNION {
-                    wd:${entityId} wdt:P106 wd:Q10800557 .  # acteur de cinéma
-                } UNION {
-                    wd:${entityId} wdt:P106 wd:Q10798782 .  # acteur de télévision
-                } UNION {
-                    wd:${entityId} wdt:P106 wd:Q948329 .  # acteur de théâtre
-                }
+            SELECT ?isActor ?sitelinks ?image WHERE {
+                # Vérifier si acteur
+                BIND(EXISTS {
+                    {
+                        wd:${entityId} wdt:P106 wd:Q33999 .  # acteur/actrice
+                    } UNION {
+                        wd:${entityId} wdt:P106 wd:Q10800557 .  # acteur de cinéma
+                    } UNION {
+                        wd:${entityId} wdt:P106 wd:Q10798782 .  # acteur de télévision
+                    } UNION {
+                        wd:${entityId} wdt:P106 wd:Q948329 .  # acteur de théâtre
+                    }
+                } AS ?isActor)
+                
+                # Récupérer la popularité
+                wd:${entityId} wikibase:sitelinks ?sitelinks .
+                
+                # Récupérer l'image (s'il y en a une)
+                OPTIONAL { wd:${entityId} wdt:P18 ?image . }
             }
         `;
 
@@ -100,53 +124,20 @@ async function checkIfActor(entityId) {
 
             const response = await fetch(url);
             if (!response.ok) {
-                return false;
+                return { isActor: false, popularity: 0, imageUrl: null };
             }
 
             const data = await response.json();
-            return data.boolean === true;
+            const result = data.results.bindings[0];
+            
+            return {
+                isActor: result?.isActor?.value === 'true',
+                popularity: parseInt(result?.sitelinks?.value || 0),
+                imageUrl: result?.image?.value || null
+            };
         } catch (error) {
             console.error('Erreur vérification acteur:', error);
-            return false;
-        }
-    });
-}
-
-/**
- * Récupère l'image d'un acteur depuis Wikidata
- * @param {string} entityId - ID de l'entité Wikidata (ex: Q123)
- * @returns {Promise<string|null>}
- */
-async function getActorImage(entityId) {
-    const cacheKey = `actor_image:${entityId}`;
-    
-    return await getCachedOrFetch(cacheKey, async () => {
-        const query = `
-            SELECT ?image WHERE {
-                wd:${entityId} wdt:P18 ?image .
-            }
-            LIMIT 1
-        `;
-
-        try {
-            const url = `${WIKIDATA_SPARQL_ENDPOINT}?` + new URLSearchParams({
-                query: query,
-                format: 'json'
-            });
-
-            const response = await fetch(url);
-            if (!response.ok) {
-                return null;
-            }
-
-            const data = await response.json();
-            if (data.results.bindings.length > 0) {
-                return data.results.bindings[0].image.value;
-            }
-            return null;
-        } catch (error) {
-            console.error('Erreur récupération image:', error);
-            return null;
+            return { isActor: false, popularity: 0, imageUrl: null };
         }
     });
 }
