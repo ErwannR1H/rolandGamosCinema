@@ -30,19 +30,17 @@ describe('wikidataService', () => {
                 })
             });
 
-            // Mock de la vérification que c'est un acteur (ASK query)
-            fetch.mockResolvedValueOnce({
-                ok: true,
-                json: async () => ({ boolean: true })
-            });
-
-            // Mock de la récupération de l'image
+            // Mock de la vérification avec popularité
             fetch.mockResolvedValueOnce({
                 ok: true,
                 json: async () => ({
                     results: {
                         bindings: [
-                            { image: { value: 'https://example.com/image.jpg' } }
+                            {
+                                isActor: { value: 'true' },
+                                sitelinks: { value: '150' },
+                                image: { value: 'https://example.com/image.jpg' }
+                            }
                         ]
                     }
                 })
@@ -55,11 +53,12 @@ describe('wikidataService', () => {
                 label: 'Tom Hanks',
                 description: 'American actor',
                 wikidataUrl: 'https://www.wikidata.org/wiki/Q123',
-                imageUrl: 'https://example.com/image.jpg'
+                imageUrl: 'https://example.com/image.jpg',
+                popularity: 150
             });
 
-            // Vérifier que fetch a été appelé 3 fois
-            expect(fetch).toHaveBeenCalledTimes(3);
+            // Vérifier que fetch a été appelé 2 fois (recherche + vérification)
+            expect(fetch).toHaveBeenCalledTimes(2);
         });
 
         test('devrait retourner null si aucun résultat trouvé', async () => {
@@ -92,7 +91,16 @@ describe('wikidataService', () => {
             // Mock de la vérification - ce n'est pas un acteur
             fetch.mockResolvedValueOnce({
                 ok: true,
-                json: async () => ({ boolean: false })
+                json: async () => ({
+                    results: {
+                        bindings: [
+                            {
+                                isActor: { value: 'false' },
+                                sitelinks: { value: '200' }
+                            }
+                        ]
+                    }
+                })
             });
 
             const result = await findActorOnWikidata('Paris');
