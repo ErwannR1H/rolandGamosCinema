@@ -135,21 +135,21 @@ function GraphManager({ onGraphLoaded, onStartDownload }) {
                         disabled={isDownloading}
                         style={{ padding: '8px 16px' }}
                     >
-                        📥 Petit (100 hubs + 2000 total)
+                         Petit (100 hubs + 2000 total)
                     </button>
                     <button 
                         onClick={() => handleDownload(200, 3000)} 
                         disabled={isDownloading}
                         style={{ padding: '8px 16px' }}
                     >
-                        📥 Moyen (200 hubs + 3000 total)
+                         Moyen (200 hubs + 3000 total)
                     </button>
                     <button 
                         onClick={() => handleDownload(500, 5000)} 
                         disabled={isDownloading}
                         style={{ padding: '8px 16px' }}
                     >
-                        📥 Large (500 hubs + 5000 total)
+                         Large (500 hubs + 5000 total)
                     </button>
                 </div>
             </div>
@@ -162,7 +162,7 @@ function GraphManager({ onGraphLoaded, onStartDownload }) {
                             onClick={() => downloadGraphAsFile(graph)}
                             style={{ padding: '8px 16px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                         >
-                            💾 Télécharger le graphe actuel
+                             Télécharger le graphe actuel
                         </button>
                     </div>
                 </div>

@@ -69,7 +69,7 @@ function NetworkAnalysis() {
               </Link>
             </div>
             
-            <h1> 🕸️ Analyse du Réseau d'Acteurs</h1>
+            <h1> Analyse du Réseau d'Acteurs</h1>
             <p>Téléchargez un graphe d'acteurs depuis Wikidata pour analyser les connexions et visualiser le réseau.</p>
             
             <GraphManager 
@@ -86,7 +86,7 @@ function NetworkAnalysis() {
                     margin: '20px 0'
                 }}>
                     <p style={{ fontSize: '1.2em', color: '#666' }}>
-                        ⏳ Téléchargement en cours... Veuillez patienter.
+                         Téléchargement en cours... Veuillez patienter.
                     </p>
                 </div>
             )}
@@ -96,7 +96,7 @@ function NetworkAnalysis() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                         {/* Acteurs Hub */}
                         <div style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '8px' }}>
-                            <h3>🌟 Acteurs "Hub" (Plus de connexions)</h3>
+                            <h3> Acteurs "Hub" (Plus de connexions)</h3>
                             <p style={{ fontSize: '12px', color: '#666' }}>
                                 Ces acteurs créent le plus de connexions et sont faciles à relier.
                             </p>
@@ -121,7 +121,7 @@ function NetworkAnalysis() {
 
                         {/* Acteurs Bridge */}
                         <div style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '8px' }}>
-                            <h3>🌉 Acteurs "Bridge" (Connectent des groupes)</h3>
+                            <h3> Acteurs "Pièges" (pour gagner)</h3>
                             <p style={{ fontSize: '12px', color: '#666' }}>
                                 Ces acteurs relient des groupes différents - stratégiques pour bloquer l'adversaire.
                             </p>
@@ -147,7 +147,7 @@ function NetworkAnalysis() {
 
                     {/* Contrôles de visualisation */}
                     <div style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
-                        <h3>🔍 Explorer un sous-graphe</h3>
+                        <h3> Explorer un sous-graphe</h3>
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                             <select 
                                 value={selectedActor} 
@@ -190,12 +190,12 @@ function NetworkAnalysis() {
 
                     {/* Visualisation */}
                     <div>
-                        <h3>📊 Visualisation du Réseau</h3>
+                        <h3> Visualisation du Réseau</h3>
                         <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>Chargement de la visualisation...</div>}>
                             <NetworkVisualization data={subgraph || graph} />
                         </Suspense>
                         <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
-                            <p>💡 Conseils :</p>
+                            <p> Conseils :</p>
                             <ul>
                                 <li>La taille des cercles représente le nombre de connexions</li>
                                 <li>Les couleurs indiquent le niveau de connectivité (violet = peu connecté, jaune = très connecté)</li>
