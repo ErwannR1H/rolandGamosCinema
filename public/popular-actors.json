@@ -7,13 +7,6 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Tamer%20Hassan%20Gumball%203000%20Rally%202007%20%28cropped%29.jpg"
   },
   {
-    "actor": "http://www.wikidata.org/entity/Q309932",
-    "label": "Bruce Campbell",
-    "description": "American actor",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q309932",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Bruce%20Campbell%20by%20Gage%20Skidmore.jpg"
-  },
-  {
     "actor": "http://www.wikidata.org/entity/Q203960",
     "label": "James Earl Jones",
     "description": "American actor (1931–2024)",
@@ -84,25 +77,11 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Woody%20Allen%20Cannes%202011.jpg"
   },
   {
-    "actor": "http://www.wikidata.org/entity/Q178348",
-    "label": "Chris Evans",
-    "description": "American actor (born 1981)",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q178348",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Chris%20Evans%20Red%202024.jpg"
-  },
-  {
     "actor": "http://www.wikidata.org/entity/Q200405",
     "label": "John Hurt",
     "description": "British actor (1940–2017)",
     "wikidataUrl": "https://www.wikidata.org/wiki/Q200405",
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/John%20Hurt%20by%20Walterlan%20Papetti.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q16296",
-    "label": "Patrick Stewart",
-    "description": "British actor (born 1940)",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q16296",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Patrick%20Stewart%20by%20Gage%20Skidmore%202.jpg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q311804",
@@ -138,13 +117,6 @@
     "description": "American actor",
     "wikidataUrl": "https://www.wikidata.org/wiki/Q319725",
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Lou%20Diamond%20Phillips%20at%20the%20Chiller%20Theatre%20Expo%202017.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q40096",
-    "label": "Will Smith",
-    "description": "American actor, film producer and rapper (born 1968)",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q40096",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/TechCrunch%20Disrupt%202019%20%2848834434641%29%20%28cropped%29.jpg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q123351",
@@ -273,13 +245,6 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/MichaelShannon-byPhilipRomano.jpg"
   },
   {
-    "actor": "http://www.wikidata.org/entity/Q219717",
-    "label": "Chris Tucker",
-    "description": "American actor and comedian",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q219717",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Chris%20Tucker%20by%20Gage%20Skidmore.jpg"
-  },
-  {
     "actor": "http://www.wikidata.org/entity/Q83492",
     "label": "Gary Oldman",
     "description": "British actor and filmmaker (born 1958)",
@@ -301,13 +266,6 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/ANTHONY%20HOPKINS%20White%20house%20correspondents%20dinner%20Wash.%20D.C.%201996%20%285113175432%29.jpg"
   },
   {
-    "actor": "http://www.wikidata.org/entity/Q29250",
-    "label": "Bill Murray",
-    "description": "American actor and comedian",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q29250",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Bill%20Murray-8882.jpg"
-  },
-  {
     "actor": "http://www.wikidata.org/entity/Q132952",
     "label": "Adam Sandler",
     "description": "American actor and comedian",
@@ -327,6 +285,13 @@
     "description": "American actor (born 1947)",
     "wikidataUrl": "https://www.wikidata.org/wiki/Q105817",
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/KevinKlineAAFeb09.jpg"
+  },
+  {
+    "actor": "http://www.wikidata.org/entity/Q106706",
+    "label": "Jeff Goldblum",
+    "description": "American actor and musician",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q106706",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Jeff%20Goldblum%20by%20Gage%20Skidmore.jpg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q442547",
@@ -364,13 +329,6 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Matt%20Dillon%202010.jpg"
   },
   {
-    "actor": "http://www.wikidata.org/entity/Q462327",
-    "label": "John Heard",
-    "description": "American actor (1946–2017)",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q462327",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/JohnHeardActor2010.png"
-  },
-  {
     "actor": "http://www.wikidata.org/entity/Q105825",
     "label": "William Hurt",
     "description": "American actor (1950–2022)",
@@ -406,6 +364,13 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Tom%20Hanks%20at%20the%20Elvis%20Premiere%202022.jpg"
   },
   {
+    "actor": "http://www.wikidata.org/entity/Q109324",
+    "label": "Christopher Lloyd",
+    "description": "American actor (born 1938)",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q109324",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Christopher%20Lloyd%20%2853135075986%29.jpg"
+  },
+  {
     "actor": "http://www.wikidata.org/entity/Q215072",
     "label": "John Goodman",
     "description": "American actor",
@@ -434,11 +399,32 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Paul%20Newman%20-%201958.jpg"
   },
   {
+    "actor": "http://www.wikidata.org/entity/Q3018962",
+    "label": "David Warner",
+    "description": "Australian international cricketer",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q3018962",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/David%20Warner.jpg"
+  },
+  {
     "actor": "http://www.wikidata.org/entity/Q103784",
     "label": "Donald Sutherland",
     "description": "Canadian actor (1935–2024)",
     "wikidataUrl": "https://www.wikidata.org/wiki/Q103784",
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Donald%20Sutherland%20%28cropped%29.JPG"
+  },
+  {
+    "actor": "http://www.wikidata.org/entity/Q165518",
+    "label": "Ewan McGregor",
+    "description": "Scottish actor",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q165518",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Ewan%20McGregor%20-%20Los%20Angeles%20Comic%20Con%202024.jpg"
+  },
+  {
+    "actor": "http://www.wikidata.org/entity/Q165219",
+    "label": "Robert Downey Jr.",
+    "description": "American actor (born 1965)",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q165219",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Robert%20Downey%20Jr%202014%20Comic%20Con%20%28cropped%29.jpg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q205707",
@@ -469,11 +455,25 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Robert%20Carlyle%20in%202017.jpg"
   },
   {
+    "actor": "http://www.wikidata.org/entity/Q160432",
+    "label": "Jude Law",
+    "description": "English actor",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q160432",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Jude%20Law-67896.jpg"
+  },
+  {
     "actor": "http://www.wikidata.org/entity/Q139325",
     "label": "Zach Galifianakis",
     "description": "American actor and comedian",
     "wikidataUrl": "https://www.wikidata.org/wiki/Q139325",
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Zach%20Galifianakis%202012%20%28cropped%29.jpg"
+  },
+  {
+    "actor": "http://www.wikidata.org/entity/Q178552",
+    "label": "Mickey Rourke",
+    "description": "American actor and former boxer",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q178552",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Mickey%20Rourke%2010%20December%202010%20%28cropped%29.jpeg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q193659",
@@ -588,18 +588,18 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Philip%20Seymour%20Hoffman%202011.jpg"
   },
   {
+    "actor": "http://www.wikidata.org/entity/Q204590",
+    "label": "Christian Slater",
+    "description": "American actor and producer (born 1969)",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q204590",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Christian%20Slater%20by%20Gage%20Skidmore.jpg"
+  },
+  {
     "actor": "http://www.wikidata.org/entity/Q203804",
     "label": "Tim Roth",
     "description": "British actor",
     "wikidataUrl": "https://www.wikidata.org/wiki/Q203804",
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Tim%20Roth%20by%20Gage%20Skidmore%202.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q165518",
-    "label": "Ewan McGregor",
-    "description": "Scottish actor",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q165518",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Ewan%20McGregor%20-%20Los%20Angeles%20Comic%20Con%202024.jpg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q134895",
@@ -637,13 +637,6 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Colin%20Firth%20by%20Gage%20Skidmore.jpg"
   },
   {
-    "actor": "http://www.wikidata.org/entity/Q165219",
-    "label": "Robert Downey Jr.",
-    "description": "American actor (born 1965)",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q165219",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Robert%20Downey%20Jr%202014%20Comic%20Con%20%28cropped%29.jpg"
-  },
-  {
     "actor": "http://www.wikidata.org/entity/Q169982",
     "label": "Gerard Butler",
     "description": "Scottish actor and film producer (born 1969)",
@@ -663,6 +656,13 @@
     "description": "American actor",
     "wikidataUrl": "https://www.wikidata.org/wiki/Q188792",
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/David%20Schwimmer%202011.jpg"
+  },
+  {
+    "actor": "http://www.wikidata.org/entity/Q214223",
+    "label": "Jason Isaacs",
+    "description": "British actor (born 1963)",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q214223",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Jason%20Isaacs-45.jpg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q189415",
@@ -693,6 +693,20 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Christopher%20Walken%202018.jpg"
   },
   {
+    "actor": "http://www.wikidata.org/entity/Q188772",
+    "label": "Willem Dafoe",
+    "description": "American actor (1955-)",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q188772",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Willem%20Dafoe-63667%20%28cropped%29.jpg"
+  },
+  {
+    "actor": "http://www.wikidata.org/entity/Q183542",
+    "label": "Martin Lawrence",
+    "description": "American actor and comedian (born 1965)",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q183542",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/MartinLawrenceHWOFJune2013.jpg"
+  },
+  {
     "actor": "http://www.wikidata.org/entity/Q191132",
     "label": "Harvey Keitel",
     "description": "American actor",
@@ -707,11 +721,25 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/SamuelLJackson.jpg"
   },
   {
+    "actor": "http://www.wikidata.org/entity/Q208649",
+    "label": "Paul Giamatti",
+    "description": "American actor (born 1967)",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q208649",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Paul%20Giamatti%20MFF%202024.jpg"
+  },
+  {
     "actor": "http://www.wikidata.org/entity/Q193212",
     "label": "Seann William Scott",
     "description": "American actor (born 1976)",
     "wikidataUrl": "https://www.wikidata.org/wiki/Q193212",
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Seann%20William%20Scott%202012.jpg"
+  },
+  {
+    "actor": "http://www.wikidata.org/entity/Q170587",
+    "label": "Tommy Lee Jones",
+    "description": "American actor and film director",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q170587",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Tommy%20Lee%20Jones%202017.jpg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q193815",
@@ -733,6 +761,13 @@
     "description": "South Korean actor",
     "wikidataUrl": "https://www.wikidata.org/wiki/Q484575",
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Choi%20Min-sik.jpg"
+  },
+  {
+    "actor": "http://www.wikidata.org/entity/Q133313",
+    "label": "Jake Gyllenhaal",
+    "description": "American actor (born 1980)",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q133313",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Jake%20Gyllenhaal%202019%20by%20Glenn%20Francis.jpg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q136209",
@@ -784,6 +819,13 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Omar%20Sharif%201963.JPG"
   },
   {
+    "actor": "http://www.wikidata.org/entity/Q180272",
+    "label": "Gary Sinise",
+    "description": "American actor",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q180272",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Gary%20Sinise%202011%20%28cropped%29.jpg"
+  },
+  {
     "actor": "http://www.wikidata.org/entity/Q206659",
     "label": "Brendan Gleeson",
     "description": "Irish actor",
@@ -819,69 +861,6 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/%28John%20Rhys-Davies%29%202018-02-11%2015-35-40%20ILCE-6500%20DSC07150%20%2831235662177%29%20%28cropped%29.jpg"
   },
   {
-    "actor": "http://www.wikidata.org/entity/Q182763",
-    "label": "Forest Whitaker",
-    "description": "American actor",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q182763",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Forest%20Whitaker%20by%20Gage%20Skidmore.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q160432",
-    "label": "Jude Law",
-    "description": "English actor",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q160432",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Jude%20Law-67896.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q178552",
-    "label": "Mickey Rourke",
-    "description": "American actor and former boxer",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q178552",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Mickey%20Rourke%2010%20December%202010%20%28cropped%29.jpeg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q204590",
-    "label": "Christian Slater",
-    "description": "American actor and producer (born 1969)",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q204590",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Christian%20Slater%20by%20Gage%20Skidmore.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q214223",
-    "label": "Jason Isaacs",
-    "description": "British actor (born 1963)",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q214223",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Jason%20Isaacs-45.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q183542",
-    "label": "Martin Lawrence",
-    "description": "American actor and comedian (born 1965)",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q183542",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/MartinLawrenceHWOFJune2013.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q208649",
-    "label": "Paul Giamatti",
-    "description": "American actor (born 1967)",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q208649",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Paul%20Giamatti%20MFF%202024.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q133313",
-    "label": "Jake Gyllenhaal",
-    "description": "American actor (born 1980)",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q133313",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Jake%20Gyllenhaal%202019%20by%20Glenn%20Francis.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q180272",
-    "label": "Gary Sinise",
-    "description": "American actor",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q180272",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Gary%20Sinise%202011%20%28cropped%29.jpg"
-  },
-  {
     "actor": "http://www.wikidata.org/entity/Q185079",
     "label": "Jim Broadbent",
     "description": "English actor (born 1949)",
@@ -889,18 +868,11 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Jim%20Broadbent%202012.jpg"
   },
   {
-    "actor": "http://www.wikidata.org/entity/Q188772",
-    "label": "Willem Dafoe",
-    "description": "American actor (1955-)",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q188772",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Willem%20Dafoe-63667%20%28cropped%29.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q170587",
-    "label": "Tommy Lee Jones",
-    "description": "American actor and film director",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q170587",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Tommy%20Lee%20Jones%202017.jpg"
+    "actor": "http://www.wikidata.org/entity/Q182763",
+    "label": "Forest Whitaker",
+    "description": "American actor",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q182763",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Forest%20Whitaker%20by%20Gage%20Skidmore.jpg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q310394",
@@ -1526,6 +1498,13 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Karl%20Urban%20SXSW%202022%20%28cropped%29.jpg"
   },
   {
+    "actor": "http://www.wikidata.org/entity/Q309932",
+    "label": "Bruce Campbell",
+    "description": "American actor",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q309932",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Bruce%20Campbell%20by%20Gage%20Skidmore.jpg"
+  },
+  {
     "actor": "http://www.wikidata.org/entity/Q107933",
     "label": "Jim Belushi",
     "description": "American actor",
@@ -1540,11 +1519,32 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Matthew%20McConaughey%202025.jpg"
   },
   {
+    "actor": "http://www.wikidata.org/entity/Q178348",
+    "label": "Chris Evans",
+    "description": "American actor (born 1981)",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q178348",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Chris%20Evans%20Red%202024.jpg"
+  },
+  {
+    "actor": "http://www.wikidata.org/entity/Q16296",
+    "label": "Patrick Stewart",
+    "description": "British actor (born 1940)",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q16296",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Patrick%20Stewart%20by%20Gage%20Skidmore%202.jpg"
+  },
+  {
     "actor": "http://www.wikidata.org/entity/Q343453",
     "label": "Chris Klein",
     "description": "American actor",
     "wikidataUrl": "https://www.wikidata.org/wiki/Q343453",
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Chris%20Klein%202012.jpg"
+  },
+  {
+    "actor": "http://www.wikidata.org/entity/Q40096",
+    "label": "Will Smith",
+    "description": "American actor, film producer and rapper (born 1968)",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q40096",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/TechCrunch%20Disrupt%202019%20%2848834434641%29%20%28cropped%29.jpg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q297071",
@@ -1617,6 +1617,13 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Emilio%20Estevez%20and%20Martin%20Sheen%20%28cropped%20to%20Emilio%29.jpg"
   },
   {
+    "actor": "http://www.wikidata.org/entity/Q219717",
+    "label": "Chris Tucker",
+    "description": "American actor and comedian",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q219717",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Chris%20Tucker%20by%20Gage%20Skidmore.jpg"
+  },
+  {
     "actor": "http://www.wikidata.org/entity/Q43203",
     "label": "Clint Eastwood",
     "description": "American actor and film director (born 1930)",
@@ -1631,11 +1638,11 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Tim%20Curry%20cropped.jpg"
   },
   {
-    "actor": "http://www.wikidata.org/entity/Q106706",
-    "label": "Jeff Goldblum",
-    "description": "American actor and musician",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q106706",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Jeff%20Goldblum%20by%20Gage%20Skidmore.jpg"
+    "actor": "http://www.wikidata.org/entity/Q29250",
+    "label": "Bill Murray",
+    "description": "American actor and comedian",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q29250",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Bill%20Murray-8882.jpg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q35332",
@@ -1659,18 +1666,18 @@
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/AV0A6306%20Sean%20Bean%20%28cropped%29.jpg"
   },
   {
+    "actor": "http://www.wikidata.org/entity/Q462327",
+    "label": "John Heard",
+    "description": "American actor (1946–2017)",
+    "wikidataUrl": "https://www.wikidata.org/wiki/Q462327",
+    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/JohnHeardActor2010.png"
+  },
+  {
     "actor": "http://www.wikidata.org/entity/Q125904",
     "label": "Edward Norton",
     "description": "American actor",
     "wikidataUrl": "https://www.wikidata.org/wiki/Q125904",
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Ed%20Norton%20and%20Shauna%20Robertson%20TIFF%202025%20%28cropped%29.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q109324",
-    "label": "Christopher Lloyd",
-    "description": "American actor (born 1938)",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q109324",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Christopher%20Lloyd%20%2853135075986%29.jpg"
   },
   {
     "actor": "http://www.wikidata.org/entity/Q117392",
@@ -1699,12 +1706,5 @@
     "description": "British actor (born 1977)",
     "wikidataUrl": "https://www.wikidata.org/wiki/Q208026",
     "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Tom%20Hardy%20by%20Gage%20Skidmore%20in%202018.jpg"
-  },
-  {
-    "actor": "http://www.wikidata.org/entity/Q3018962",
-    "label": "David Warner",
-    "description": "Australian international cricketer",
-    "wikidataUrl": "https://www.wikidata.org/wiki/Q3018962",
-    "imageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/David%20Warner.jpg"
   }
 ]

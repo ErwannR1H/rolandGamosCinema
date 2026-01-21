@@ -15,52 +15,11 @@ export function findHubActors(graph, topN = 20) {
 }
 
 /**
- * Trouve les acteurs "bridge" qui connectent des groupes différents
- * Utilise la notion de betweenness centrality (simplifié)
+ * Trouve les acteurs "pièges" qui mettent en difficulté l'adversaire
+ * On définit un acteur piège comme un acteur connecté à un hub et peu d'utres acteurs
  * @param {Object} graph - Le graphe complet
  * @returns {Array}
- * A CHANGER POUR QUE CE SOIT LES ACTEURS PIEGES : PRENDRE CEUX QUI SONT
- * A UN SEUL ACTEUR TRES CONNECTES (PLUS DE 50) ET QUI LUI-MEME A PEU DE CONNEXIONS (MOINS DE ?)
- * TESTER LES PARAMETRES ET VOIR LES RESULTATS
  */
-// export function findBridgeActors(graph) {
-//     const betweenness = new Map();
-    
-//     graph.actors.forEach(actor => {
-//         betweenness.set(actor.id, 0);
-//     });
-
-//     // Calcul simplifié : un acteur est un bridge s'il connecte des acteurs
-//     // qui ne sont pas directement connectés entre eux
-//     graph.actors.forEach(actor => {
-//         const coActors = new Set(actor.coActors);
-//         let bridgeScore = 0;
-        
-//         // Compter les paires de co-acteurs non connectées
-//         const coActorsList = Array.from(coActors);
-//         for (let i = 0; i < coActorsList.length; i++) {
-//             for (let j = i + 1; j < coActorsList.length; j++) {
-//                 const coActor1 = graph.actors.find(a => a.id === coActorsList[i]);
-//                 const coActor2 = graph.actors.find(a => a.id === coActorsList[j]);
-                
-//                 if (coActor1 && coActor2 && !coActor1.coActors.includes(coActor2.id)) {
-//                     bridgeScore++;
-//                 }
-//             }
-//         }
-        
-//         betweenness.set(actor.id, bridgeScore);
-//     });
-
-//     return graph.actors
-//         .map(actor => ({
-//             ...actor,
-//             bridgeScore: betweenness.get(actor.id)
-//         }))
-//         .sort((a, b) => b.bridgeScore - a.bridgeScore)
-//         .slice(0, 20);
-// }
-
 export function findBridgeActors(graph) {
     const betweenness = new Map();
     

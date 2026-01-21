@@ -47,7 +47,7 @@ function extractActorNamesFromHTML() {
  * Récupère tous les acteurs Wikidata correspondant aux noms en UNE SEULE requête
  */
 async function fetchAllActorsFromWikidata(names) {
-    console.log('\n🔍 Recherche de tous les acteurs sur Wikidata en une seule requête...');
+    console.log('\nRecherche de tous les acteurs sur Wikidata en une seule requête...');
     
     // Créer une liste VALUES avec tous les noms
     const valuesClause = names
@@ -117,7 +117,7 @@ async function main() {
     try {
         // 1. Extraire les noms du HTML
         const actorNames = extractActorNamesFromHTML();
-        console.log(`✅ ${actorNames.length} noms d'acteurs extraits du HTML`);
+        console.log(`${actorNames.length} noms d'acteurs extraits du HTML`);
         
         // 2. Récupérer tous les acteurs en une seule requête
         const actors = await fetchAllActorsFromWikidata(actorNames);
